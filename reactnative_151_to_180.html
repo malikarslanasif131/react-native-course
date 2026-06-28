@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>React Native Prep · Bonus Module: Advanced Concepts &amp; Production Essentials (Q151–180)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+/* ── TOKENS ─────────────────────────────────────────────── */
+:root{
+  --ink:        #0c0d14;
+  --ink-2:      #3c3d50;
+  --ink-3:      #7b7d96;
+  --surface:    #ffffff;
+  --ground:     #f3f4f9;
+  --border:     #e4e5f0;
+  --accent:     #b45309;   /* amber — distinguishes the bonus module */
+  --accent-lt:  #fef3e2;
+  --accent-glow:rgba(180,83,9,.12);
+  --code-bg:    #0d1117;
+  --code-fg:    #c9d1d9;
+  --code-str:   #a5d6ff;
+  --code-cmt:   #484f58;
+  --r:          14px;
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:  0 4px 16px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.05);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,.09), 0 2px 6px rgba(0,0,0,.05);
+}
+
+/* ── RESET ──────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--ground);
+  color:var(--ink);
+  line-height:1.7;
+  min-height:100vh;
+  font-size:15px;
+}
+
+/* ── HERO ───────────────────────────────────────────────── */
+.hero{
+  background:linear-gradient(145deg,#1f1300 0%,#5c3a00 35%,#b45309 70%,#d97706 100%);
+  padding:72px 24px 56px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+.hero::before{
+  content:'';
+  position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.15) 1px,transparent 1px);
+  background-size:28px 28px;
+  pointer-events:none;
+  z-index:0;
+}
+.hero::after{
+  content:'';
+  position:absolute;
+  bottom:-120px;right:-80px;
+  width:500px;height:500px;
+  border-radius:50%;
+  background:rgba(217,119,6,.25);
+  filter:blur(80px);
+  pointer-events:none;
+  z-index:0;
+}
+.hero > *{position:relative;z-index:1}
+.hero-eyebrow{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.7rem;
+  font-weight:700;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.55);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:99px;
+  padding:4px 16px;
+  margin-bottom:24px;
+}
+.hero h1{
+  font-size:clamp(2rem,5.5vw,3.25rem);
+  font-weight:900;
+  letter-spacing:-.035em;
+  color:#fff;
+  line-height:1.1;
+  margin-bottom:14px;
+}
+.hero-sub{
+  font-size:1rem;
+  color:rgba(255,255,255,.7);
+  max-width:580px;
+  margin:0 auto 32px;
+  font-weight:400;
+  line-height:1.65;
+}
+.chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.chip{
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.18);
+  color:rgba(255,255,255,.92);
+  padding:5px 16px;
+  border-radius:99px;
+  font-size:.75rem;
+  font-weight:600;
+  letter-spacing:.02em;
+  backdrop-filter:blur(8px);
+}
+
+/* ── PROGRESS STRIP ─────────────────────────────────────── */
+.progress-strip{
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  padding:14px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.ps-label{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.ps-bar{
+  width:200px;height:6px;
+  background:var(--border);
+  border-radius:99px;
+  overflow:hidden;
+}
+.ps-fill{
+  height:100%;
+  width:100%; /* 180/180 = 100% */
+  background:linear-gradient(90deg,#b45309,#d97706);
+  border-radius:99px;
+  transition:width .4s ease;
+}
+.ps-count{font-size:.78rem;font-weight:600;color:var(--accent);font-family:'JetBrains Mono',monospace}
+
+/* ── LAYOUT ──────────────────────────────────────────────── */
+.container{
+  max-width:860px;
+  margin:0 auto;
+  padding:40px 20px 80px;
+}
+
+/* ── MODULE INTRO ────────────────────────────────────────── */
+.mod-intro{
+  background:var(--surface);
+  border-radius:var(--r);
+  padding:28px 32px;
+  margin-bottom:36px;
+  border-left:3px solid var(--accent);
+  box-shadow:var(--shadow-md);
+  display:flex;
+  gap:20px;
+  align-items:flex-start;
+}
+.mod-icon{
+  font-size:2rem;
+  flex-shrink:0;
+  margin-top:2px;
+  line-height:1;
+}
+.mod-intro-tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--accent);
+  background:var(--accent-lt);
+  padding:3px 10px;
+  border-radius:5px;
+  display:inline-block;
+  margin-bottom:10px;
+}
+.mod-intro p{color:var(--ink-2);font-size:.92rem;line-height:1.75}
+.mod-intro strong{color:var(--ink);font-weight:600}
+
+/* ── QUESTION CARD ───────────────────────────────────────── */
+.card{
+  background:var(--surface);
+  border-radius:var(--r);
+  margin-bottom:20px;
+  box-shadow:var(--shadow-md);
+  border:1px solid var(--border);
+  overflow:hidden;
+  transition:box-shadow .2s ease, transform .2s ease;
+}
+.card:hover{
+  box-shadow:var(--shadow-lg);
+  transform:translateY(-1px);
+}
+
+.card-bar{
+  height:3px;
+  background:linear-gradient(90deg,var(--accent),#d97706);
+}
+
+.card-body{padding:28px 32px 32px}
+
+/* ── QUESTION HEADER ─────────────────────────────────────── */
+.qh{
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  margin-bottom:22px;
+  position:relative;
+}
+.qh::before{
+  content:attr(data-n);
+  font-family:'JetBrains Mono',monospace;
+  font-size:7rem;
+  font-weight:900;
+  color:var(--accent);
+  opacity:.04;
+  position:absolute;
+  top:-24px;right:-8px;
+  line-height:1;
+  pointer-events:none;
+  user-select:none;
+  letter-spacing:-.05em;
+}
+.qn{
+  flex-shrink:0;
+  width:40px;height:40px;
+  border-radius:10px;
+  background:linear-gradient(135deg,#b45309,#d97706);
+  color:#fff;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.72rem;
+  font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  margin-top:3px;
+  box-shadow:0 2px 8px rgba(180,83,9,.35);
+}
+.qt{
+  font-size:1.03rem;
+  font-weight:700;
+  color:var(--ink);
+  line-height:1.45;
+  flex:1;
+}
+
+/* ── DIVIDER ─────────────────────────────────────────────── */
+.div{border:none;border-top:1px solid var(--border);margin:18px 0}
+
+/* ── SECTION LABEL ───────────────────────────────────────── */
+.lbl{
+  font-size:.63rem;
+  font-weight:800;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ink-3);
+  margin-bottom:8px;
+}
+
+/* ── ANSWER ──────────────────────────────────────────────── */
+.ans{
+  color:var(--ink-2);
+  font-size:.92rem;
+  line-height:1.82;
+}
+.ans strong{color:var(--ink);font-weight:600}
+.ans code{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.79rem;
+  background:#fef3e2;
+  color:#92400e;
+  padding:1px 6px;
+  border-radius:4px;
+  font-weight:500;
+}
+
+/* ── CODE BLOCK ──────────────────────────────────────────── */
+.code-wrap{margin-top:22px}
+.cb-header{
+  background:#1c2030;
+  border-radius:10px 10px 0 0;
+  padding:9px 16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.dots{display:flex;gap:5px;flex-shrink:0}
+.dot{width:11px;height:11px;border-radius:50%}
+.dr{background:#ff5f57}.dy{background:#febc2e}.dg{background:#28c840}
+.lang-badge{
+  margin-left:auto;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.63rem;
+  color:#5d7080;
+  font-weight:600;
+  letter-spacing:.06em;
+}
+pre{
+  background:var(--code-bg);
+  border-radius:0 0 10px 10px;
+  padding:20px 22px;
+  overflow-x:auto;
+  margin:0;
+}
+code.blk{
+  font-family:'JetBrains Mono','Fira Code','Courier New',monospace;
+  font-size:.79rem;
+  line-height:1.75;
+  color:var(--code-fg);
+  white-space:pre;
+  display:block;
+}
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+.footer{text-align:center;padding:48px 20px 70px}
+.footer-card{
+  display:inline-block;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:32px 44px;
+  box-shadow:var(--shadow-lg);
+  max-width:480px;
+}
+.footer-card .done-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:#fef3e2;color:#92400e;
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 12px;border-radius:99px;
+  margin-bottom:14px;
+}
+.footer-card h3{font-size:1.25rem;font-weight:800;color:var(--ink);margin-bottom:8px;letter-spacing:-.02em}
+.footer-card p{font-size:.9rem;color:var(--ink-2);line-height:1.7}
+.footer-card .trophy{font-size:2.5rem;margin-bottom:6px;display:block}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media(max-width:640px){
+  .hero{padding:52px 16px 44px}
+  .card-body{padding:22px 18px 24px}
+  .mod-intro{flex-direction:column;gap:12px;padding:20px 18px}
+  .qt{font-size:.95rem}
+  code.blk{font-size:.74rem}
+  .qh::before{font-size:5rem;top:-10px}
+  .footer-card{padding:26px 24px}
+  .code-wrap {
+  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  display: block;
+}
+
+pre {
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+  display: inline-block;
+  min-width: 100%;
+}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HERO ══════════════ -->
+<header class="hero">
+  <p class="hero-eyebrow">React Native Interview Prep · Bonus Module · 2026 Edition</p>
+  <h1>Advanced Concepts &amp; Production Essentials</h1>
+  <p class="hero-sub">New Architecture: Fabric, TurboModules &amp; Hermes · Animations, Gestures &amp; Re-render Performance · Storage, Networking, Testing &amp; Deployment</p>
+  <div class="chips">
+    <span class="chip">⚙️ Bonus Module</span>
+    <span class="chip">❓ Questions 151 – 180</span>
+    <span class="chip">🎯 Intermediate Level</span>
+    <span class="chip">⚡ 2026 Standards</span>
+  </div>
+</header>
+
+<!-- ══════════════ PROGRESS ══════════════ -->
+<div class="progress-strip">
+  <span class="ps-label">Overall Progress</span>
+  <div class="ps-bar"><div class="ps-fill"></div></div>
+  <span class="ps-count">180 / 180</span>
+</div>
+
+<!-- ══════════════ CONTENT ══════════════ -->
+<div class="container">
+
+  <div class="mod-intro">
+    <div class="mod-icon">⚙️</div>
+    <div>
+      <span class="mod-intro-tag">Bonus Module · Advanced Concepts &amp; Production Essentials</span>
+      <p>The first 150 questions covered the curriculum's five core areas — but real interviews (and real apps) also lean heavily on topics that didn't fit neatly into any single module: the <strong>New Architecture</strong> (Fabric, TurboModules, Hermes), animations and gestures, the performance habits that separate a junior from a mid-level developer (memoization, re-render control), local storage and networking, platform-specific code, and the testing/deployment pipeline that ships an app to real users. This module fills exactly those gaps.</p>
+    </div>
+  </div>
+
+  <!-- ─── Q151 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="151">
+        <div class="qn">151</div>
+        <h2 class="qt">What is the "New Architecture" in React Native (Fabric + TurboModules)?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">The <strong>New Architecture</strong> is a from-the-ground-up rebuild of React Native's internals, now the default for new projects. <strong>Fabric</strong> is the new rendering system that draws your UI, replacing the old renderer with one that can work synchronously and supports React 18 features like Concurrent Rendering. <strong>TurboModules</strong> is the new system for native modules — they're now loaded lazily (only when actually used) instead of all upfront, and communicate more directly with JavaScript. Together, they remove the old performance bottleneck of constantly serializing data back and forth across a bridge.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Old vs New</span>
+        </div>
+        <pre><code class="blk">Old Architecture:  JS ⇄ Bridge (async, JSON serialized) ⇄ Native
+New Architecture:  JS ⇄ JSI (direct, synchronous calls) ⇄ Native
+                   Fabric (rendering) + TurboModules (native modules)</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q152 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="152">
+        <div class="qn">152</div>
+        <h2 class="qt">What is JSI (JavaScript Interface) and why does it matter?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>JSI</strong> is a lightweight C++ layer that lets JavaScript hold direct references to native objects and call native functions <strong>synchronously</strong>, without needing to serialize data into JSON and pass it across an asynchronous bridge. This is the foundational piece that makes both Fabric and TurboModules possible. It matters because it eliminates an entire category of performance problems and timing bugs that came from the old bridge's async, batched nature — like the difference between shouting a question across a courtyard and waiting for an echo back (the bridge) versus simply reaching out and touching the object directly (JSI).</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Why JSI Matters</span>
+        </div>
+        <pre><code class="blk">Old Bridge: JS → JSON.stringify → native queue → JSON.parse → Native
+            (always async, always serialized — adds latency)
+
+JSI:        JS → direct C++ function call → Native
+            (can be synchronous — no serialization overhead)</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q153 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="153">
+        <div class="qn">153</div>
+        <h2 class="qt">What is Hermes, and why is it React Native's recommended JavaScript engine?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Hermes</strong> is an open-source JavaScript engine built by Meta specifically optimized for React Native — unlike general-purpose engines like JSC (JavaScriptCore) or V8, Hermes pre-compiles your JS into efficient bytecode <strong>ahead of time</strong> (during the build), rather than parsing and compiling raw JavaScript on every app launch. This results in faster app startup time, lower memory usage, and a smaller app size — all of which matter more on lower-end mobile hardware than on a desktop browser. It's been the default engine for new React Native apps since 2022.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Why Hermes Helps</span>
+        </div>
+        <pre><code class="blk">Other engines:  Parse JS → Compile → Run        (every app launch)
+Hermes:         Pre-compile to bytecode at BUILD time → just Run
+                ✅ Faster startup  ✅ Lower memory  ✅ Smaller app size</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q154 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="154">
+        <div class="qn">154</div>
+        <h2 class="qt">What was the "bridge" in the old architecture, and why was it a performance bottleneck?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">In the original React Native architecture, JavaScript and native code lived in two completely separate worlds that could only communicate by serializing messages into JSON, queuing them, and processing them <strong>asynchronously</strong> in batches — this channel was called "the bridge." Every interaction (a button tap, a layout update) meant a round trip through this serialization process, which added latency and made truly synchronous native calls impossible. It's like two offices that can only communicate via faxed memos instead of a phone call — workable, but slow and prone to messages arriving out of order or with delay.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · The Old Bridge</span>
+        </div>
+        <pre><code class="blk">JS Thread          Bridge (async, JSON)          Native Thread
+   |  ──── "update this view" (serialized) ────────►  |
+   |  ◄──── response, eventually, in a batch ───────   |
+// Every single interaction paid this round-trip cost</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q155 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="155">
+        <div class="qn">155</div>
+        <h2 class="qt">What is a Native Module, and when would you actually need to write one?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>Native Module</strong> is code written in a platform's native language (Swift/Objective-C for iOS, Kotlin/Java for Android) that exposes functionality to your JavaScript code — used when you need to access a device capability that no existing JS library covers, like a specialized Bluetooth protocol or a proprietary SDK a third-party vendor only ships natively. As a beginner, you'll rarely write one yourself; the vast majority of common needs (camera, location, storage, notifications) already have a well-maintained Expo or community library wrapping the native code for you.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · When You'd Need One</span>
+        </div>
+        <pre><code class="blk">✅ Use an existing library — covers ~95% of common needs
+   (camera, location, storage, biometrics, notifications, etc.)
+
+🛠️ Write a Native Module only when:
+   - No JS library wraps the native SDK you need
+   - You need direct access to a proprietary/specialized hardware API</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q156 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="156">
+        <div class="qn">156</div>
+        <h2 class="qt">What is the difference between the built-in Animated API and Reanimated?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">React Native's built-in <code>Animated</code> API runs most animation logic on the <strong>JavaScript thread</strong> by default (unless you opt into <code>useNativeDriver: true</code>, which only supports a limited set of properties). <strong>react-native-reanimated</strong> is a community library that runs animation logic directly on the <strong>UI thread</strong> via "worklets" — small JS functions compiled to run natively — enabling much more complex, fully native-thread animations (including ones that respond to gestures) without ever blocking on the JS thread. It's the difference between a stagehand manually moving props during a performance (Animated, JS-thread-bound) versus an automated rig that runs the cues itself without needing to check in (Reanimated, UI-thread).</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Animated vs Reanimated</span>
+        </div>
+        <pre><code class="blk">// Built-in Animated — runs on JS thread unless useNativeDriver set
+Animated.timing(opacity, { toValue: 1, useNativeDriver: true }).start();
+
+// Reanimated — worklet runs on the UI thread directly
+const opacity = useSharedValue(0);
+opacity.value = withTiming(1);</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q157 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="157">
+        <div class="qn">157</div>
+        <h2 class="qt">What is a "worklet" in react-native-reanimated and why does it matter for performance?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>worklet</strong> is a small, specially-marked JavaScript function that Reanimated compiles to run directly on the <strong>UI thread</strong> instead of the regular JS thread. Because animations defined this way never need to cross back and forth to the JS thread on every frame, they stay smooth even when the JS thread is busy doing other work (like a heavy network response being processed) — a problem that would normally cause visible animation stutter or "jank" in the default Animated API. It's like giving the orchestra's conductor (UI thread) the sheet music in advance, so the music keeps playing smoothly even if someone in the front office (JS thread) gets distracted by a phone call.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Marking a Worklet</span>
+        </div>
+        <pre><code class="blk">const animatedStyle = useAnimatedStyle(() =&gt; {
+  'worklet'; // marks this to run on the UI thread
+  return { opacity: opacity.value };
+});</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q158 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="158">
+        <div class="qn">158</div>
+        <h2 class="qt">What is react-native-gesture-handler and why is it preferred over the built-in PanResponder?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>react-native-gesture-handler</strong> is a library that recognizes touch gestures (taps, drags, pinches, swipes) using the <strong>native</strong> gesture recognition systems on each platform, rather than reconstructing gesture logic entirely in JavaScript like the older built-in <code>PanResponder</code> does. This makes gestures feel more responsive and "native," and it integrates directly with Reanimated to drive animations entirely off the JS thread. Most navigation libraries (including React Navigation's swipe-back gesture) and modern UI libraries now depend on it as a baseline requirement.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Basic Pan Gesture</span>
+        </div>
+        <pre><code class="blk">import { GestureDetector, Gesture } from 'react-native-gesture-handler';
+
+const pan = Gesture.Pan().onUpdate((e) =&gt; {
+  translateX.value = e.translationX;
+});
+
+&lt;GestureDetector gesture={pan}&gt;
+  &lt;Animated.View style={animatedStyle} /&gt;
+&lt;/GestureDetector&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q159 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="159">
+        <div class="qn">159</div>
+        <h2 class="qt">What is React.memo and when should you use it?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>React.memo</code> wraps a component so React <strong>skips re-rendering it</strong> if its props haven't actually changed since the last render — even if its parent re-rendered. This is useful for components that render often as siblings of frequently-updating state, but themselves receive the same props most of the time (like a static row in a list whose parent re-renders for unrelated reasons). It's not free, though — the comparison check itself has a small cost, so wrapping every single component "just in case" can sometimes do more harm than good; reach for it when you've actually identified unnecessary re-renders.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · React.memo</span>
+        </div>
+        <pre><code class="blk">const UserRow = React.memo(function UserRow({ name }) {
+  console.log('Rendered:', name);
+  return &lt;Text&gt;{name}&lt;/Text&gt;;
+});
+// Skips re-render if `name` prop is the same as last time</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q160 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="160">
+        <div class="qn">160</div>
+        <h2 class="qt">What is useMemo and what problem does it solve?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>useMemo</code> caches the <strong>result</strong> of an expensive calculation between re-renders, only recomputing it when one of its listed dependencies actually changes. Without it, an expensive function (like filtering or sorting a large array) would re-run on every single re-render, even ones triggered by completely unrelated state changes elsewhere in the component. It's like keeping yesterday's calculated total in a notebook instead of redoing the entire long addition from scratch every time someone glances at the page, only recalculating when one of the underlying numbers actually changes.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · useMemo</span>
+        </div>
+        <pre><code class="blk">const sortedUsers = useMemo(() =&gt; {
+  return users.slice().sort((a, b) =&gt; a.name.localeCompare(b.name));
+}, [users]); // only re-sorts when `users` itself changes</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q161 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="161">
+        <div class="qn">161</div>
+        <h2 class="qt">What is useCallback and how is it different from useMemo?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>useCallback</code> caches a <strong>function definition itself</strong> between re-renders, rather than a computed value — without it, every re-render creates a brand-new function reference, which matters when you pass that function as a prop to a <code>React.memo</code>-wrapped child, since a "new" function prop would defeat the memoization and force a re-render anyway. <code>useMemo</code> returns the result of calling a function; <code>useCallback</code> returns the function itself, unchanged, as long as its dependencies haven't changed. Think of <code>useMemo</code> as caching a finished cake, and <code>useCallback</code> as caching the recipe card itself so you're not handing out a freshly photocopied recipe every single time.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · useCallback vs useMemo</span>
+        </div>
+        <pre><code class="blk">// useMemo — caches a VALUE
+const total = useMemo(() =&gt; computeTotal(items), [items]);
+
+// useCallback — caches a FUNCTION reference
+const handlePress = useCallback(() =&gt; {
+  console.log('pressed', id);
+}, [id]);</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q162 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="162">
+        <div class="qn">162</div>
+        <h2 class="qt">What causes unnecessary re-renders in React Native, and how do you detect them?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">The most common causes are: a parent re-rendering and passing brand-new inline object/array/function props every time (even with identical values, a new reference still triggers a re-render of non-memoized children), overly broad Context values causing every consumer to update, and state stored higher in the tree than it needs to be. To detect them, you can temporarily add <code>console.log</code> statements inside suspect components, use React DevTools' Profiler tab to record a render and see exactly which components fired and why, or reach for a library like <code>why-did-you-render</code> for automatic flagging during development.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Common Culprits</span>
+        </div>
+        <pre><code class="blk">// ❌ New object/function reference on EVERY render
+&lt;Child style={{ padding: 10 }} onPress={() =&gt; doThing()} /&gt;
+
+// ✅ Stable references via memoization
+const style = useMemo(() =&gt; ({ padding: 10 }), []);
+const onPress = useCallback(() =&gt; doThing(), []);
+&lt;Child style={style} onPress={onPress} /&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q163 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="163">
+        <div class="qn">163</div>
+        <h2 class="qt">What is AsyncStorage and what is it used for?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>AsyncStorage</strong> is a simple, unencrypted, persistent key-value storage system built into React Native — data saved with it survives app restarts (though not an app uninstall). It's used for non-sensitive data you want to persist locally, like a user's theme preference, an onboarding-completed flag, or a cached copy of recently viewed items. Every read and write is asynchronous (hence the name), since it goes through native disk I/O. For anything sensitive — passwords, auth tokens — use <code>SecureStore</code> instead, never plain AsyncStorage.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · AsyncStorage Basics</span>
+        </div>
+        <pre><code class="blk">import AsyncStorage from '@react-native-async-storage/async-storage';
+
+await AsyncStorage.setItem('theme', 'dark');
+const theme = await AsyncStorage.getItem('theme'); // "dark"
+await AsyncStorage.removeItem('theme');</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q164 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="164">
+        <div class="qn">164</div>
+        <h2 class="qt">What is SecureStore (expo-secure-store), and how is it different from AsyncStorage?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>expo-secure-store</code> saves key-value pairs using the device's native encrypted storage — the iOS Keychain and Android Keystore — rather than the plain, unencrypted storage AsyncStorage uses. It's specifically intended for sensitive data: authentication tokens, refresh tokens, API secrets, or anything you wouldn't want exposed if someone gained physical access to an unlocked device's file system. Think of AsyncStorage as a notebook left on a desk anyone nearby could flip open, and SecureStore as the same notebook locked inside a small safe built into the desk.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · SecureStore Basics</span>
+        </div>
+        <pre><code class="blk">import * as SecureStore from 'expo-secure-store';
+
+await SecureStore.setItemAsync('authToken', 'abc123...');
+const token = await SecureStore.getItemAsync('authToken');</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q165 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="165">
+        <div class="qn">165</div>
+        <h2 class="qt">How do you make a network request and handle loading/error states without a library?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">React Native ships with the standard web <code>fetch()</code> API built in, so no extra install is needed for basic requests. The manual pattern is: a state for the data, a boolean for loading, and a slot for any error — set loading true, attempt the fetch inside a try/catch, store the result or the error, then set loading false in a <code>finally</code> block so it always resolves regardless of outcome. This is exactly the boilerplate that libraries like TanStack Query exist to eliminate once an app has more than a couple of these calls.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Manual fetch Pattern</span>
+        </div>
+        <pre><code class="blk">const [data, setData] = useState(null);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState(null);
+
+useEffect(() =&gt; {
+  (async () =&gt; {
+    try {
+      const res = await fetch('https://api.example.com/users');
+      if (!res.ok) throw new Error('Request failed');
+      setData(await res.json());
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  })();
+}, []);</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q166 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="166">
+        <div class="qn">166</div>
+        <h2 class="qt">What is the difference between fetch and axios in React Native?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>fetch</code> is built in and requires no install, but it's fairly bare-bones — it doesn't reject on HTTP error status codes (you must manually check <code>res.ok</code>), and it requires more boilerplate for things like setting default headers or timeouts. <strong>axios</strong> is a popular third-party library that adds convenience: automatic JSON parsing, rejecting promises on error status codes, request/response interceptors (great for automatically attaching an auth token to every request), and built-in request cancellation/timeout support. For simple apps, plain <code>fetch</code> is fine; for apps with many endpoints and shared auth logic, axios's interceptors save a lot of repeated code.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · fetch vs axios</span>
+        </div>
+        <pre><code class="blk">// fetch — must manually check .ok
+const res = await fetch(url);
+if (!res.ok) throw new Error('Failed');
+const data = await res.json();
+
+// axios — rejects automatically on error, JSON parsed for you
+const { data } = await axios.get(url);</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q167 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="167">
+        <div class="qn">167</div>
+        <h2 class="qt">What is Platform.OS, and how do you write platform-specific code with it?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>Platform.OS</code> is a simple string value — <code>'ios'</code> or <code>'android'</code> — that tells your code which operating system it's currently running on, letting you branch logic or styling for platform-specific differences (like shadow styling, which works very differently between the two). There's also <code>Platform.select()</code>, which lets you pick an entire value based on platform in a single, cleaner expression rather than nested ternaries scattered everywhere.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Platform.OS & select</span>
+        </div>
+        <pre><code class="blk">import { Platform } from 'react-native';
+
+if (Platform.OS === 'ios') { /* iOS-only logic */ }
+
+const shadow = Platform.select({
+  ios: { shadowOpacity: 0.2, shadowRadius: 4 },
+  android: { elevation: 4 },
+});</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q168 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="168">
+        <div class="qn">168</div>
+        <h2 class="qt">What is the .ios.js / .android.js file extension convention?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Instead of branching logic inside one file with <code>Platform.OS</code> checks, you can create two entirely separate files — <code>Button.ios.js</code> and <code>Button.android.js</code> — and Metro (React Native's bundler) automatically picks the correct one at build time based on the target platform, while everywhere else in your code you simply <code>import Button from './Button'</code> with no extension. This is the right tool when a component's implementation differs so much between platforms that maintaining one shared file with heavy branching would be messier than just keeping two clean, separate versions.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">File Tree · Platform-Specific Files</span>
+        </div>
+        <pre><code class="blk">components/
+├── Button.ios.js       ← used automatically on iOS builds
+└── Button.android.js   ← used automatically on Android builds
+
+// Anywhere else:
+import Button from './components/Button'; // no extension needed</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q169 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="169">
+        <div class="qn">169</div>
+        <h2 class="qt">What is SafeAreaView and why is it needed?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Many phones have notches, camera cutouts, rounded corners, or system gesture bars that can overlap your app's content if you ignore them. <code>SafeAreaView</code> (or the more flexible <code>useSafeAreaInsets</code> hook from <code>react-native-safe-area-context</code>) automatically adds the right amount of padding so your content stays clear of these areas on every device, without you having to hardcode device-specific measurements. Think of it as automatically pulling your furniture back from a room's irregular alcoves and pillars, so nothing gets visually "swallowed" by the architecture.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · SafeAreaView</span>
+        </div>
+        <pre><code class="blk">import { SafeAreaView } from 'react-native-safe-area-context';
+
+&lt;SafeAreaView style={{ flex: 1 }}&gt;
+  &lt;Text&gt;Never hidden behind a notch or status bar&lt;/Text&gt;
+&lt;/SafeAreaView&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q170 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="170">
+        <div class="qn">170</div>
+        <h2 class="qt">What is KeyboardAvoidingView and what problem does it solve?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">When the on-screen keyboard pops up to let a user type into a <code>TextInput</code>, it can cover the very input field they're trying to use, especially near the bottom of the screen. <code>KeyboardAvoidingView</code> wraps your content and automatically shifts it up (via padding, position, or height adjustments, depending on the chosen <code>behavior</code> prop) so the active input stays visible above the keyboard. Without it, a form at the bottom of a screen becomes nearly unusable once the keyboard appears — like trying to write on a desk while a drawer slides shut right where your hand is.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · KeyboardAvoidingView</span>
+        </div>
+        <pre><code class="blk">&lt;KeyboardAvoidingView
+  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  style={{ flex: 1 }}&gt;
+  &lt;TextInput placeholder="Type here…" /&gt;
+&lt;/KeyboardAvoidingView&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q171 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="171">
+        <div class="qn">171</div>
+        <h2 class="qt">What is the AppState API and what is it used for?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">The <strong>AppState</strong> API tells you whether your app is currently <code>'active'</code> (in the foreground, visible), <code>'background'</code> (minimized), or <code>'inactive'</code> (transitioning, mostly an iOS-specific brief state), and lets you subscribe to changes between these states. It's commonly used to pause a video or refresh data the moment a user returns to the app, or to log a session-end timestamp the moment they leave. Think of it as a doorbell camera that tells you exactly when someone walks in or out of the room, so you can react at precisely the right moment.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Listening for App State</span>
+        </div>
+        <pre><code class="blk">import { AppState } from 'react-native';
+
+useEffect(() =&gt; {
+  const sub = AppState.addEventListener('change', (nextState) =&gt; {
+    if (nextState === 'active') refreshData(); // user just came back
+  });
+  return () =&gt; sub.remove();
+}, []);</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q172 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="172">
+        <div class="qn">172</div>
+        <h2 class="qt">What is Deep Linking and how does it work in React Native?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Deep linking</strong> lets a special URL (like <code>myapp://product/42</code> or a real web link via Universal/App Links) open your app directly to a <strong>specific screen</strong>, rather than just launching to the home screen. Tapping a deep link from an email, text message, or another app passes that URL to your running or newly-launched app, where React Navigation (or Expo Router automatically) parses it and routes to the matching screen, often with parameters extracted from the URL itself. It's like a building having a direct elevator button for "Floor 12, Suite B" instead of every visitor having to start at the lobby and ask for directions.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Linking Config</span>
+        </div>
+        <pre><code class="blk">const linking = {
+  prefixes: ['myapp://', 'https://myapp.com'],
+  config: {
+    screens: { Product: 'product/:id' }, // myapp://product/42 → Product screen
+  },
+};
+
+&lt;NavigationContainer linking={linking}&gt;...&lt;/NavigationContainer&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q173 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="173">
+        <div class="qn">173</div>
+        <h2 class="qt">What is a WebView and when would you use one?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>react-native-webview</code> embeds a full browser engine inside your app, capable of rendering any web page or HTML content right inside a native screen. It's used when you need to show content that's easier (or only possible) to render as a web page — a third-party payment checkout page, full rich-text/HTML content, an embedded video player from a service without a native SDK, or quickly wrapping an existing website inside an app shell. Think of it as a window built into your app's wall that looks directly out into the web, rather than rebuilding everything you see through that window using native components.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Basic WebView</span>
+        </div>
+        <pre><code class="blk">import { WebView } from 'react-native-webview';
+
+&lt;WebView source={{ uri: 'https://example.com' }} style={{ flex: 1 }} /&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q174 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="174">
+        <div class="qn">174</div>
+        <h2 class="qt">What is the Modal component, and how is it different from navigating to a regular screen?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>Modal</code> renders content <strong>above</strong> the entire current screen, usually with a dimmed background behind it, without going through the normal navigation stack — it's meant for short-lived, focused interruptions like a confirmation dialog, an image preview, or a quick settings panel, rather than a full new "page" in your app's flow. Unlike pushing a new screen via React Navigation, a Modal doesn't add a back-button history entry by default and is typically dismissed by tapping outside it or an explicit close action rather than the system back gesture. It's the difference between a pop-up sticky note placed temporarily on your desk (Modal) versus turning to a whole new page in a notebook (screen navigation).</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Basic Modal</span>
+        </div>
+        <pre><code class="blk">&lt;Modal visible={showModal} transparent animationType="slide"&gt;
+  &lt;View style={{ flex: 1, justifyContent: 'center', backgroundColor: '#000a' }}&gt;
+    &lt;View style={{ backgroundColor: '#fff', margin: 30, padding: 20 }}&gt;
+      &lt;Text&gt;Are you sure?&lt;/Text&gt;
+      &lt;Button title="Close" onPress={() =&gt; setShowModal(false)} /&gt;
+    &lt;/View&gt;
+  &lt;/View&gt;
+&lt;/Modal&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q175 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="175">
+        <div class="qn">175</div>
+        <h2 class="qt">What is Jest and how is it used for testing React Native apps?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Jest</strong> is a JavaScript test runner — it discovers test files, runs the functions inside them, and reports pass/fail results, and it ships pre-configured by default in every new React Native project. You write a <code>test()</code> or <code>it()</code> block describing what's being checked, call your code, and assert the output matches what you expect using <code>expect()</code>. It's used for "unit testing" pure logic — a price-formatting function, a validation rule, a reducer — where you can verify correctness without rendering any actual UI.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Basic Jest Test</span>
+        </div>
+        <pre><code class="blk">function formatPrice(cents) {
+  return `$${(cents / 100).toFixed(2)}`;
+}
+
+test('formats cents into a dollar string', () =&gt; {
+  expect(formatPrice(1999)).toBe('$19.99');
+});</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q176 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="176">
+        <div class="qn">176</div>
+        <h2 class="qt">What is React Native Testing Library, and what kind of testing does it enable?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>React Native Testing Library</strong> renders your actual components in a simulated environment (no real device needed) and lets you query the result the way a <em>user</em> would — finding text on screen, simulating a button press, then asserting on what's now visible — rather than poking at internal component state or implementation details directly. This is "component testing": verifying your UI behaves correctly from the outside, which tends to survive refactors better than tests tightly coupled to internal implementation.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Component Test Example</span>
+        </div>
+        <pre><code class="blk">import { render, fireEvent, screen } from '@testing-library/react-native';
+
+test('increments counter on press', () =&gt; {
+  render(&lt;Counter /&gt;);
+  fireEvent.press(screen.getByText('Increment'));
+  expect(screen.getByText('Count: 1')).toBeTruthy();
+});</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q177 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="177">
+        <div class="qn">177</div>
+        <h2 class="qt">What is Detox, and what kind of testing does it provide?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Detox</strong> is an end-to-end (E2E) testing framework that runs your <strong>actual compiled app</strong> on a real simulator/emulator or device and automates full user flows — tapping through a real login screen, navigating between real screens, verifying real navigation transitions happen correctly. Unlike Jest (logic only) or Testing Library (isolated components), Detox tests the entire app working together exactly as a real user would experience it, catching integration bugs that smaller-scoped tests would miss — at the cost of being slower and more complex to set up and run.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Detox E2E Flow</span>
+        </div>
+        <pre><code class="blk">describe('Login flow', () =&gt; {
+  it('logs in and shows the home screen', async () =&gt; {
+    await element(by.id('email')).typeText('user@test.com');
+    await element(by.id('password')).typeText('secret123');
+    await element(by.id('loginButton')).tap();
+    await expect(element(by.id('homeScreen'))).toBeVisible();
+  });
+});</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q178 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="178">
+        <div class="qn">178</div>
+        <h2 class="qt">What are environment variables in React Native, and why do you need them?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Environment variables let you keep environment-specific values — API base URLs, public API keys, feature flags — out of your hardcoded source code, so you can swap them between development, staging, and production builds without changing a single line of app logic. In Expo apps, this is commonly handled through <code>app.config.js</code>'s <code>extra</code> field plus EAS's secret environment variable storage for sensitive values used during the build process, ensuring secrets never get committed into your git repository.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Reading an Env Variable</span>
+        </div>
+        <pre><code class="blk">// app.config.js
+export default {
+  expo: { extra: { apiUrl: process.env.API_URL } },
+};
+
+// In your app code:
+import Constants from 'expo-constants';
+const apiUrl = Constants.expoConfig.extra.apiUrl;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q179 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="179">
+        <div class="qn">179</div>
+        <h2 class="qt">What is an EAS Update (OTA update), and how is it different from a full app store release?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">An <strong>EAS Update</strong> (Over-The-Air update) pushes a new version of your app's JavaScript bundle directly to users' devices, who download it automatically the next time they open the app — without going through App Store or Play Store review at all. This works for changes confined to your JS code (bug fixes, UI tweaks, content updates) but <strong>cannot</strong> ship changes that need new native code or permissions, which still require a full store submission and review cycle. It's the difference between quietly swapping out the contents of a vending machine overnight (OTA update) versus needing to physically replace the machine itself, which requires inspection and approval first (store release).</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · Publishing an OTA Update</span>
+        </div>
+        <pre><code class="blk">eas update --branch production --message "Fix checkout bug"
+// Users get this update automatically — no App/Play Store review needed
+// (only works for JS-only changes — native code changes need a new build)</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q180 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="180">
+        <div class="qn">180</div>
+        <h2 class="qt">What basic accessibility practices should every React Native developer follow?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Give every meaningful interactive element an <code>accessibilityLabel</code> describing what it does (especially icon-only buttons with no visible text), use <code>accessibilityRole</code> so screen readers announce an element correctly ("button," "link," "header"), ensure tappable elements meet a minimum touch target size (roughly 44×44 points) so they're usable for people with motor impairments, and verify text/background color combinations have sufficient contrast for low-vision users. These small additions are what let screen readers like VoiceOver (iOS) and TalkBack (Android) describe your app coherently to users who can't see the screen — skipping them effectively locks those users out of your app entirely.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Basic Accessibility Props</span>
+        </div>
+        <pre><code class="blk">&lt;Pressable
+  accessibilityRole="button"
+  accessibilityLabel="Add item to cart"
+  style={{ minWidth: 44, minHeight: 44 }}
+  onPress={addToCart}&gt;
+  &lt;Icon name="cart-plus" /&gt;
+&lt;/Pressable&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer class="footer">
+  <div class="footer-card">
+    <span class="trophy">🏆</span>
+    <span class="done-badge">✅ Bonus Module Complete</span>
+    <h3>180 / 180 Questions Done!</h3>
+    <p>You've now covered the original 5-module curriculum <strong>plus</strong> the advanced, production-level topics that round out a real interview: the New Architecture, animations &amp; gestures, performance optimization, storage &amp; networking, platform-specific code, testing, and deployment. That's a genuinely comprehensive React Native foundation. 🎉</p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>React Native Prep · Module 5: Push Notifications via FCM (Q121–150)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+/* ── TOKENS ─────────────────────────────────────────────── */
+:root{
+  --ink:        #0c0d14;
+  --ink-2:      #3c3d50;
+  --ink-3:      #7b7d96;
+  --surface:    #ffffff;
+  --ground:     #f3f4f9;
+  --border:     #e4e5f0;
+  --accent:     #4338ca;
+  --accent-lt:  #eef0fd;
+  --accent-glow:rgba(67,56,202,.12);
+  --code-bg:    #0d1117;
+  --code-fg:    #c9d1d9;
+  --code-str:   #a5d6ff;
+  --code-cmt:   #484f58;
+  --r:          14px;
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:  0 4px 16px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.05);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,.09), 0 2px 6px rgba(0,0,0,.05);
+}
+
+/* ── RESET ──────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--ground);
+  color:var(--ink);
+  line-height:1.7;
+  min-height:100vh;
+  font-size:15px;
+}
+
+/* ── HERO ───────────────────────────────────────────────── */
+.hero{
+  background:linear-gradient(145deg,#1a0a3d 0%,#2d1b69 35%,#4338ca 70%,#6d28d9 100%);
+  padding:72px 24px 56px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+.hero::before{
+  content:'';
+  position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.15) 1px,transparent 1px);
+  background-size:28px 28px;
+  pointer-events:none;
+  z-index:0;
+}
+.hero::after{
+  content:'';
+  position:absolute;
+  bottom:-120px;right:-80px;
+  width:500px;height:500px;
+  border-radius:50%;
+  background:rgba(109,40,217,.25);
+  filter:blur(80px);
+  pointer-events:none;
+  z-index:0;
+}
+.hero > *{position:relative;z-index:1}
+.hero-eyebrow{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.7rem;
+  font-weight:700;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.55);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:99px;
+  padding:4px 16px;
+  margin-bottom:24px;
+}
+.hero h1{
+  font-size:clamp(2rem,5.5vw,3.25rem);
+  font-weight:900;
+  letter-spacing:-.035em;
+  color:#fff;
+  line-height:1.1;
+  margin-bottom:14px;
+}
+.hero-sub{
+  font-size:1rem;
+  color:rgba(255,255,255,.65);
+  max-width:560px;
+  margin:0 auto 32px;
+  font-weight:400;
+  line-height:1.65;
+}
+.chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.chip{
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.18);
+  color:rgba(255,255,255,.88);
+  padding:5px 16px;
+  border-radius:99px;
+  font-size:.75rem;
+  font-weight:600;
+  letter-spacing:.02em;
+  backdrop-filter:blur(8px);
+}
+
+/* ── PROGRESS STRIP ─────────────────────────────────────── */
+.progress-strip{
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  padding:14px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.ps-label{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.ps-bar{
+  width:200px;height:6px;
+  background:var(--border);
+  border-radius:99px;
+  overflow:hidden;
+}
+.ps-fill{
+  height:100%;
+  width:100%; /* 150/150 = 100% */
+  background:linear-gradient(90deg,#4338ca,#6d28d9);
+  border-radius:99px;
+  transition:width .4s ease;
+}
+.ps-count{font-size:.78rem;font-weight:600;color:var(--accent);font-family:'JetBrains Mono',monospace}
+
+/* ── LAYOUT ──────────────────────────────────────────────── */
+.container{
+  max-width:860px;
+  margin:0 auto;
+  padding:40px 20px 80px;
+}
+
+/* ── MODULE INTRO ────────────────────────────────────────── */
+.mod-intro{
+  background:var(--surface);
+  border-radius:var(--r);
+  padding:28px 32px;
+  margin-bottom:36px;
+  border-left:3px solid var(--accent);
+  box-shadow:var(--shadow-md);
+  display:flex;
+  gap:20px;
+  align-items:flex-start;
+}
+.mod-icon{
+  font-size:2rem;
+  flex-shrink:0;
+  margin-top:2px;
+  line-height:1;
+}
+.mod-intro-tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--accent);
+  background:var(--accent-lt);
+  padding:3px 10px;
+  border-radius:5px;
+  display:inline-block;
+  margin-bottom:10px;
+}
+.mod-intro p{color:var(--ink-2);font-size:.92rem;line-height:1.75}
+.mod-intro strong{color:var(--ink);font-weight:600}
+
+/* ── QUESTION CARD ───────────────────────────────────────── */
+.card{
+  background:var(--surface);
+  border-radius:var(--r);
+  margin-bottom:20px;
+  box-shadow:var(--shadow-md);
+  border:1px solid var(--border);
+  overflow:hidden;
+  transition:box-shadow .2s ease, transform .2s ease;
+}
+.card:hover{
+  box-shadow:var(--shadow-lg);
+  transform:translateY(-1px);
+}
+
+.card-bar{
+  height:3px;
+  background:linear-gradient(90deg,var(--accent),#7c3aed);
+}
+
+.card-body{padding:28px 32px 32px}
+
+/* ── QUESTION HEADER ─────────────────────────────────────── */
+.qh{
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  margin-bottom:22px;
+  position:relative;
+}
+.qh::before{
+  content:attr(data-n);
+  font-family:'JetBrains Mono',monospace;
+  font-size:7rem;
+  font-weight:900;
+  color:var(--accent);
+  opacity:.04;
+  position:absolute;
+  top:-24px;right:-8px;
+  line-height:1;
+  pointer-events:none;
+  user-select:none;
+  letter-spacing:-.05em;
+}
+.qn{
+  flex-shrink:0;
+  width:40px;height:40px;
+  border-radius:10px;
+  background:linear-gradient(135deg,#4338ca,#7c3aed);
+  color:#fff;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.72rem;
+  font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  margin-top:3px;
+  box-shadow:0 2px 8px rgba(67,56,202,.35);
+}
+.qt{
+  font-size:1.03rem;
+  font-weight:700;
+  color:var(--ink);
+  line-height:1.45;
+  flex:1;
+}
+
+/* ── DIVIDER ─────────────────────────────────────────────── */
+.div{border:none;border-top:1px solid var(--border);margin:18px 0}
+
+/* ── SECTION LABEL ───────────────────────────────────────── */
+.lbl{
+  font-size:.63rem;
+  font-weight:800;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ink-3);
+  margin-bottom:8px;
+}
+
+/* ── ANSWER ──────────────────────────────────────────────── */
+.ans{
+  color:var(--ink-2);
+  font-size:.92rem;
+  line-height:1.82;
+}
+.ans strong{color:var(--ink);font-weight:600}
+.ans code{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.79rem;
+  background:#eef0fd;
+  color:#3730a3;
+  padding:1px 6px;
+  border-radius:4px;
+  font-weight:500;
+}
+
+/* ── CODE BLOCK ──────────────────────────────────────────── */
+.code-wrap{margin-top:22px}
+.cb-header{
+  background:#1c2030;
+  border-radius:10px 10px 0 0;
+  padding:9px 16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.dots{display:flex;gap:5px;flex-shrink:0}
+.dot{width:11px;height:11px;border-radius:50%}
+.dr{background:#ff5f57}.dy{background:#febc2e}.dg{background:#28c840}
+.lang-badge{
+  margin-left:auto;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.63rem;
+  color:#5d7080;
+  font-weight:600;
+  letter-spacing:.06em;
+}
+pre{
+  background:var(--code-bg);
+  border-radius:0 0 10px 10px;
+  padding:20px 22px;
+  overflow-x:auto;
+  margin:0;
+}
+code.blk{
+  font-family:'JetBrains Mono','Fira Code','Courier New',monospace;
+  font-size:.79rem;
+  line-height:1.75;
+  color:var(--code-fg);
+  white-space:pre;
+  display:block;
+}
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+.footer{text-align:center;padding:48px 20px 70px}
+.footer-card{
+  display:inline-block;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:32px 44px;
+  box-shadow:var(--shadow-lg);
+  max-width:480px;
+}
+.footer-card .done-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:#dcfce7;color:#15803d;
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 12px;border-radius:99px;
+  margin-bottom:14px;
+}
+.footer-card h3{font-size:1.25rem;font-weight:800;color:var(--ink);margin-bottom:8px;letter-spacing:-.02em}
+.footer-card p{font-size:.9rem;color:var(--ink-2);line-height:1.7}
+.footer-card .trophy{font-size:2.5rem;margin-bottom:6px;display:block}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media(max-width:640px){
+  .hero{padding:52px 16px 44px}
+  .card-body{padding:22px 18px 24px}
+  .mod-intro{flex-direction:column;gap:12px;padding:20px 18px}
+  .qt{font-size:.95rem}
+  code.blk{font-size:.74rem}
+  .qh::before{font-size:5rem;top:-10px}
+  .footer-card{padding:26px 24px}
+  .code-wrap {
+  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  display: block;
+}
+
+pre {
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+  display: inline-block;
+  min-width: 100%;
+}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HERO ══════════════ -->
+<header class="hero">
+  <p class="hero-eyebrow">React Native Interview Prep · 2026 Edition</p>
+  <h1>Push Notifications via FCM</h1>
+  <p class="hero-sub">How FCM Works: Tokens &amp; App States · Registering Credentials &amp; Certificates · Displaying Alerts with expo-notifications &amp; Notifee</p>
+  <div class="chips">
+    <span class="chip">🔔 Module 5 of 5</span>
+    <span class="chip">❓ Questions 121 – 150</span>
+    <span class="chip">🎯 Beginner Friendly</span>
+    <span class="chip">⚡ 2026 Standards</span>
+  </div>
+</header>
+
+<!-- ══════════════ PROGRESS ══════════════ -->
+<div class="progress-strip">
+  <span class="ps-label">Overall Progress</span>
+  <div class="ps-bar"><div class="ps-fill"></div></div>
+  <span class="ps-count">150 / 150</span>
+</div>
+
+<!-- ══════════════ CONTENT ══════════════ -->
+<div class="container">
+
+  <div class="mod-intro">
+    <div class="mod-icon">🔔</div>
+    <div>
+      <span class="mod-intro-tag">Module 5 · Push Notifications via Firebase Cloud Messaging</span>
+      <p>This final module covers how apps reach users even when they're not actively looking at the screen. You'll learn the mechanics of <strong>Firebase Cloud Messaging (FCM)</strong> — device tokens and the three app states a notification can arrive in — how the native credentials and certificates behind the scenes actually get set up, and how to display notifications locally using <code>expo-notifications</code> or the more advanced <strong>Notifee</strong> library. This is a frequently-tested interview area because it touches native platform quirks that trip up many beginners.</p>
+    </div>
+  </div>
+
+  <!-- ─── Q121 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="121">
+        <div class="qn">121</div>
+        <h2 class="qt">What is Firebase Cloud Messaging (FCM) and what problem does it solve?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>FCM</strong> is Google's free, cross-platform messaging service that lets a backend server send a message to a specific app installed on a specific device, even if that app isn't currently open. It's the delivery infrastructure underneath nearly every push notification you've ever received — a backend doesn't talk directly to a phone; it hands the message to FCM, and FCM routes it through Apple's or Google's own push delivery networks to the exact device. Think of it as a postal service: your server writes the letter, but FCM is the courier network that actually knows how to reach the recipient's mailbox, wherever they are.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Delivery Path</span>
+        </div>
+        <pre><code class="blk">Your Backend Server
+        ↓  sends message + device token
+Firebase Cloud Messaging (FCM)
+        ↓  routes via platform push network
+Apple Push Notification service (APNs)  /  Google Play Services
+        ↓
+User's Device — notification appears 🔔</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q122 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="122">
+        <div class="qn">122</div>
+        <h2 class="qt">What is a push notification "token" or device token?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>device token</strong> is a unique, long string generated by the push service that identifies one specific app installation on one specific device — essentially a mailing address that only your backend can use to deliver a message to that exact device. Without it, FCM has no way to know which of billions of devices to send a notification to. It's like a private PO box number: your server keeps a list of every user's box number, and sending mail simply means addressing it correctly to that box.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSON · Example Token Shape</span>
+        </div>
+        <pre><code class="blk">// A real token is much longer — this is illustrative
+"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
+
+// Or raw FCM token format:
+"fGq3K9z...:APA91bH..." // 100+ characters long</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q123 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="123">
+        <div class="qn">123</div>
+        <h2 class="qt">How is a device token generated and registered in a React Native app?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">When your app first requests notification permission and the user grants it, the device registers itself with the platform's push service (APNs on iOS, FCM directly on Android), which generates a unique token and hands it back to your app code. Your app's job is then to <strong>send that token to your own backend</strong> — typically saving it against the logged-in user's account in your database — so your server knows where to deliver future messages. The token itself is generated by the OS/push service; your app and backend are just responsible for capturing and storing it.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Getting & Sending the Token</span>
+        </div>
+        <pre><code class="blk">import * as Notifications from 'expo-notifications';
+
+const { data: token } = await Notifications.getExpoPushTokenAsync();
+
+// Send it to your own backend to save against the user's account
+await fetch('https://api.myapp.com/save-token', {
+  method: 'POST',
+  body: JSON.stringify({ userId, token }),
+});</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q124 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="124">
+        <div class="qn">124</div>
+        <h2 class="qt">What is the difference between raw FCM and Expo's Push Notification service?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Raw FCM requires your backend to talk directly to Google's servers (and separately to Apple's APNs for iOS), managing two different credential systems and message formats. <strong>Expo's Push Notification service</strong> sits as a friendly middle layer in front of both — your backend sends one simple request to Expo's servers using an Expo push token, and Expo handles translating and routing it to FCM or APNs correctly behind the scenes. It's like using one universal shipping company that handles customs paperwork for both international destinations, instead of dealing with two separate customs offices yourself.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · One Layer vs Two</span>
+        </div>
+        <pre><code class="blk">Raw FCM:    Backend → FCM (Android) AND Backend → APNs (iOS) — 2 systems
+Expo Push:  Backend → Expo Push API → (Expo routes to FCM/APNs for you)</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q125 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="125">
+        <div class="qn">125</div>
+        <h2 class="qt">What happens to a push notification when the app is in the Foreground?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">When the app is open and actively visible, the OS generally does <strong>not</strong> automatically show the system notification banner — instead, your JavaScript code receives the message directly through a listener, and it's entirely up to you whether and how to display something (a custom in-app banner, a toast, or nothing at all). This is intentional: since the user is already looking at your app, a jarring OS-level alert popping over their current screen would often be disruptive. Think of it as a phone call arriving while you're already mid-conversation with the caller in person — there's no need to also ring the doorbell.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Foreground Listener</span>
+        </div>
+        <pre><code class="blk">import * as Notifications from 'expo-notifications';
+
+Notifications.addNotificationReceivedListener((notification) =&gt; {
+  // App is open right now — decide what to do yourself
+  console.log('Received while foregrounded:', notification.request.content.title);
+});</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q126 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="126">
+        <div class="qn">126</div>
+        <h2 class="qt">What happens to a push notification when the app is in the Background?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">When the app is minimized but still running in memory (the user switched to another app or the home screen), a standard notification message is handled entirely by the OS — it shows the native banner/alert in the system tray automatically, without your JavaScript code needing to do anything. Your app's code only "wakes up" again if the user actually taps the notification, which typically opens the app and fires a "response received" event you can listen for to navigate somewhere specific.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Handling the Tap</span>
+        </div>
+        <pre><code class="blk">Notifications.addNotificationResponseReceivedListener((response) =&gt; {
+  // Fires when the user TAPS the system notification
+  const screen = response.notification.request.content.data?.screen;
+  navigation.navigate(screen);
+});</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q127 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="127">
+        <div class="qn">127</div>
+        <h2 class="qt">What happens when the app is Quit/Killed (fully terminated)?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">If the app process has been fully terminated (not just backgrounded), a standard notification still shows up via the OS, exactly like the background case — but your JavaScript runtime isn't running at all, so no listeners can fire until the app is actually launched. If the user taps the notification, the OS launches the app fresh, and you typically need to check for an "initial notification" on startup to know the app was opened <em>because of</em> a tap, rather than a normal manual launch.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Checking Launch Source</span>
+        </div>
+        <pre><code class="blk">// On cold start — was the app launched BY tapping a notification?
+const response = await Notifications.getLastNotificationResponseAsync();
+
+if (response) {
+  const screen = response.notification.request.content.data?.screen;
+  // Navigate there once the app finishes mounting
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q128 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="128">
+        <div class="qn">128</div>
+        <h2 class="qt">What is the difference between a "data" message and a "notification" message in FCM?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>notification</strong> message includes a title and body that the OS automatically displays in the system tray — your app doesn't have to do anything for it to appear. A <strong>data</strong> message contains only a custom key-value payload with <strong>no</strong> automatic visual — your app's JavaScript code must wake up and decide entirely on its own what to do with it (which might be nothing visible at all, like silently syncing fresh content). It's the difference between a sealed envelope with a visible "URGENT" stamp the mail carrier shows you immediately (notification) versus a plain unmarked envelope you have to personally open to know what's inside (data).</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSON · Two Payload Shapes</span>
+        </div>
+        <pre><code class="blk">// Notification message — OS shows this automatically
+{ "notification": { "title": "New Message", "body": "Hi there!" } }
+
+// Data-only message — app code decides what (if anything) to show
+{ "data": { "type": "sync", "userId": "42" } }</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q129 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="129">
+        <div class="qn">129</div>
+        <h2 class="qt">How do you send a test push notification to a specific device token?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">If using Expo's push service, you can send a quick test directly via a simple HTTP POST to Expo's push API with the target token, title, and body — no backend code required for a manual test. This is extremely useful during development to confirm your token registration and notification display logic both actually work, before wiring up any real backend trigger logic.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · curl Test Send</span>
+        </div>
+        <pre><code class="blk">curl -X POST https://exp.host/--/api/v2/push/send \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "ExponentPushToken[xxxxxxxxxxxx]",
+    "title": "Hello!",
+    "body": "This is a test notification."
+  }'</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q130 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="130">
+        <div class="qn">130</div>
+        <h2 class="qt">Why can device tokens change or expire, and how should apps handle that?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Tokens aren't permanent — they can rotate when the app is reinstalled, the user restores a device from backup, the underlying push service refreshes its credentials, or after long periods of inactivity. If your backend keeps sending to a stale token, delivery just silently fails. The fix is to register a listener for token refresh events and immediately re-send the new token to your backend whenever it fires, treating the token less like a permanent ID and more like a lease that needs periodic renewal.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Token Refresh Handling</span>
+        </div>
+        <pre><code class="blk">// Pseudo-flow — always keep your backend's copy current
+onTokenRefresh((newToken) =&gt; {
+  saveTokenToBackend(userId, newToken); // overwrite the old one
+});
+// Never assume a token captured once will remain valid forever</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q131 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="131">
+        <div class="qn">131</div>
+        <h2 class="qt">What is a Firebase project, and how do you connect it to a React Native app?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>Firebase project</strong> is a container in Google's Firebase console that groups together all the backend services (Cloud Messaging, Analytics, Auth, etc.) for one app. Connecting it means registering your app's package name (Android) and bundle identifier (iOS) inside that project, which generates the two configuration files your native build needs. It's like opening a single account with a utility company that provides several services (electricity, water, gas) under one umbrella — registering your "address" (app identifiers) with that account is what activates the services for your specific building.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Connection Steps</span>
+        </div>
+        <pre><code class="blk">1. Create a project at console.firebase.google.com
+2. Register your Android package name + iOS bundle ID inside it
+3. Download google-services.json (Android) + GoogleService-Info.plist (iOS)
+4. Add both files to your project / app.json config</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q132 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="132">
+        <div class="qn">132</div>
+        <h2 class="qt">What is google-services.json and where does it go?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>google-services.json</code> is the Android configuration file you download from your Firebase project — it contains the project ID, API keys, and identifiers that let your Android app authenticate with Firebase services, including FCM. In a Managed Expo app, you reference its file path inside <code>app.json</code> under the Android config, and EAS Build automatically picks it up and embeds it correctly during the native build process — you never need to manually touch native Android folders.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSON · app.json Reference</span>
+        </div>
+        <pre><code class="blk">{
+  "expo": {
+    "android": {
+      "googleServicesFile": "./google-services.json"
+    }
+  }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q133 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="133">
+        <div class="qn">133</div>
+        <h2 class="qt">What is GoogleService-Info.plist and where does it go?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>GoogleService-Info.plist</code> is the iOS equivalent of <code>google-services.json</code> — a configuration file downloaded from your Firebase project containing the keys and identifiers your iOS app needs to talk to Firebase. Just like the Android file, in a Managed Expo project you simply reference its path inside <code>app.json</code> under the iOS config, and EAS Build embeds it into the native iOS project automatically during the build.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSON · app.json Reference</span>
+        </div>
+        <pre><code class="blk">{
+  "expo": {
+    "ios": {
+      "googleServicesFile": "./GoogleService-Info.plist"
+    }
+  }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q134 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="134">
+        <div class="qn">134</div>
+        <h2 class="qt">What is an APNs certificate/key, and why does iOS need it in addition to Firebase?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Apple requires its <strong>own</strong> authentication mechanism — an APNs (Apple Push Notification service) key or certificate, generated in your Apple Developer account — before Apple's push servers will deliver any message to an iPhone, regardless of which third-party service (Firebase included) is involved. Firebase actually uses your APNs key/certificate internally to relay messages through Apple's network on your behalf — it doesn't bypass Apple's own gatekeeping. It's like needing a customs stamp valid specifically for one country, even if a shared shipping company is handling the rest of the delivery route for both countries.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Two-Layer iOS Requirement</span>
+        </div>
+        <pre><code class="blk">iOS push delivery requires BOTH:
+  1. An APNs Key/Cert from Apple Developer (uploaded into Firebase)
+  2. Firebase's own project config (GoogleService-Info.plist)
+// EAS credentials manager can generate/upload the APNs key for you</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q135 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="135">
+        <div class="qn">135</div>
+        <h2 class="qt">What is an FCM Server Key / Service Account, and why must it stay secret?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">The <strong>Server Key</strong> (or newer Service Account JSON file) is the credential that authorizes your <strong>backend</strong> to send messages through FCM on behalf of your Firebase project. Unlike the client-side config files (which are safe to bundle into your app), this key must <strong>never</strong> be embedded in your mobile app or committed to a public repository — anyone holding it could send unlimited spoofed notifications to all your users. It belongs exclusively on your server, kept as a protected secret, the same way you'd never tape your house key to your front door.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Where Each Key Belongs</span>
+        </div>
+        <pre><code class="blk">✅ Client app (bundled, OK to ship):
+   google-services.json, GoogleService-Info.plist
+
+🔒 Backend server ONLY (never ship to client, never commit publicly):
+   FCM Service Account JSON / Server Key</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q136 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="136">
+        <div class="qn">136</div>
+        <h2 class="qt">How do EAS Build credentials work for push notifications in a Managed Expo app?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>EAS</strong> (Expo Application Services) can automatically generate, store, and manage the native signing credentials and push certificates your app needs — including the iOS APNs key — without you manually logging into Apple's developer portal yourself. Running <code>eas credentials</code> walks you through generating or uploading what's needed, and EAS securely stores it for future builds. This removes one of the most error-prone, manual parts of native push setup, which is exactly the kind of friction Expo's Managed workflow exists to eliminate.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · EAS Credentials</span>
+        </div>
+        <pre><code class="blk">eas credentials
+# Interactive CLI — lets you generate/manage the iOS push key,
+# Android keystore, and other signing credentials in one place</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q137 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="137">
+        <div class="qn">137</div>
+        <h2 class="qt">What permission must be requested before notifications can be shown, on both iOS and modern Android?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">iOS has always required an explicit runtime permission prompt before any notification can be displayed — handled via <code>requestPermissionsAsync()</code> in <code>expo-notifications</code>. Android historically allowed notifications by default, but starting with <strong>Android 13</strong>, it now requires the same kind of explicit runtime permission request as iOS, closing a long-standing platform gap. Bottom line for 2026: always request notification permission explicitly on both platforms — never assume it's automatically granted.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Requesting Permission</span>
+        </div>
+        <pre><code class="blk">import * as Notifications from 'expo-notifications';
+
+const { status } = await Notifications.requestPermissionsAsync();
+if (status !== 'granted') {
+  console.log('Notifications will not be shown');
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q138 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="138">
+        <div class="qn">138</div>
+        <h2 class="qt">What is a Notification Channel on Android, and why is it required?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Since Android 8 (Oreo), every notification must belong to a <strong>channel</strong> — a named category (e.g., "Messages," "Promotions") with its own importance level, sound, and vibration settings that the user can individually control from system settings. Without creating at least a "default" channel, notifications on modern Android either fail to display or fall back to the lowest-priority behavior. It's like a building with separate mailboxes for "Bills," "Personal Mail," and "Junk" — residents can choose to get an alert bell only for certain boxes, rather than an all-or-nothing setting for every letter.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Creating a Channel</span>
+        </div>
+        <pre><code class="blk">await Notifications.setNotificationChannelAsync('default', {
+  name: 'Default',
+  importance: Notifications.AndroidImportance.HIGH,
+  vibrationPattern: [0, 250, 250, 250],
+});</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q139 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="139">
+        <div class="qn">139</div>
+        <h2 class="qt">What is the "Sender ID" in FCM?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">The <strong>Sender ID</strong> (also called the Project Number) is a unique numeric identifier for your Firebase project, used internally during the registration process so the device's push service knows which Firebase project is allowed to send it messages. It's automatically embedded inside your <code>google-services.json</code> file — as a beginner you rarely need to type it manually, but recognizing the term helps when reading Firebase documentation or debugging registration issues referencing it.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSON · Found Inside google-services.json</span>
+        </div>
+        <pre><code class="blk">{
+  "project_info": {
+    "project_number": "123456789012"   // ← this is the Sender ID
+  }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q140 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="140">
+        <div class="qn">140</div>
+        <h2 class="qt">Why can't you fully test push notifications inside Expo Go, and what should you use instead?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Expo Go</strong> is a generic pre-built app used for quick development previews, but it ships with its own fixed bundle identifier and certificates — it cannot be configured with <strong>your</strong> specific Firebase project's credentials or APNs keys. This means real, custom push notification setups (your own FCM project, your own iOS push certificates) simply don't work properly inside it. To test push notifications fully, you need a <strong>development build</strong> created via EAS Build, which compiles a real native app embedding your actual credentials — a one-time extra step that's now considered standard practice for any app needing native modules beyond what Expo Go ships with.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · Building a Dev Client</span>
+        </div>
+        <pre><code class="blk">eas build --profile development --platform ios
+# Installs a custom dev build with YOUR credentials baked in —
+# this is what lets push notifications actually be testable</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q141 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="141">
+        <div class="qn">141</div>
+        <h2 class="qt">What is expo-notifications and what does it provide?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>expo-notifications</code> is the official Expo SDK module for everything notification-related — requesting permission, fetching the push token, scheduling local notifications, listening for incoming messages, and configuring Android channels — all through one consistent JavaScript API that works across both platforms. It's the natural starting point for most apps' push notification needs before reaching for a more specialized library like Notifee for advanced custom UI.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · Install</span>
+        </div>
+        <pre><code class="blk">npx expo install expo-notifications
+import * as Notifications from 'expo-notifications';</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q142 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="142">
+        <div class="qn">142</div>
+        <h2 class="qt">How do you request notification permissions using expo-notifications, step by step?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">First check the existing status with <code>getPermissionsAsync()</code> (no prompt shown) — if it's not already <code>'granted'</code>, then call <code>requestPermissionsAsync()</code>, which triggers the native OS dialog. Always check before requesting, since repeatedly calling the request function on a device that already answered can be a no-op or, worse, confuse your permission-handling logic. This two-step pattern (check, then request only if needed) is the standard, safe approach used across all permission types in React Native, not just notifications.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Check-Then-Request Pattern</span>
+        </div>
+        <pre><code class="blk">const existing = await Notifications.getPermissionsAsync();
+let finalStatus = existing.status;
+
+if (finalStatus !== 'granted') {
+  const requested = await Notifications.requestPermissionsAsync();
+  finalStatus = requested.status;
+}
+
+if (finalStatus === 'granted') {
+  const token = await Notifications.getExpoPushTokenAsync();
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q143 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="143">
+        <div class="qn">143</div>
+        <h2 class="qt">How do you schedule a local notification with expo-notifications?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>local</strong> notification is one your app schedules itself, entirely on-device, with no backend or push token involved — useful for reminders, timers, or "your subscription expires soon" type alerts. You call <code>scheduleNotificationAsync()</code> with the content (title/body) and a <code>trigger</code> describing when to fire it (a delay in seconds, a specific date, or a repeating interval). It's the difference between a push notification (mail delivered from somewhere else) and a local notification (a sticky note you wrote yourself and set to pop up later).</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Scheduling a Local Alert</span>
+        </div>
+        <pre><code class="blk">await Notifications.scheduleNotificationAsync({
+  content: { title: 'Reminder', body: 'Time to stretch!' },
+  trigger: { seconds: 60 }, // fires 60 seconds from now
+});</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q144 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="144">
+        <div class="qn">144</div>
+        <h2 class="qt">What is Notifee, and how does it differ from expo-notifications?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Notifee</strong> is a more advanced, lower-level notification library focused entirely on rich local notification <em>display</em> — offering far deeper control than <code>expo-notifications</code>: custom action buttons embedded in the notification, expandable images, custom progress bars, grouped notifications, and finer-grained Android channel control. It's not a replacement for FCM itself (it doesn't manage push tokens or backend delivery) — it's specifically about making the notification that appears on screen look and behave exactly how you want, once a message has already arrived. Think of <code>expo-notifications</code> as the reliable basic toolkit, and Notifee as the specialist's toolkit for polished, custom notification UI.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Notifee Display Call</span>
+        </div>
+        <pre><code class="blk">import notifee from '@notifee/react-native';
+
+await notifee.displayNotification({
+  title: 'Download complete',
+  body: 'Your file is ready to view.',
+  android: { channelId: 'default', pressAction: { id: 'default' } },
+});</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q145 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="145">
+        <div class="qn">145</div>
+        <h2 class="qt">How do you handle a notification tap to navigate to a specific screen?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">You attach a navigation-target value (like a screen name or an ID) inside the notification's <code>data</code> payload when it's sent or scheduled. Then, inside your tap-response listener, you read that data back and call your navigation library's navigate function with it. The key is making sure your navigation reference (often a global ref set up at the app's root) is accessible from wherever your notification listener lives, since the listener typically sits outside the normal component tree.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Data-Driven Navigation</span>
+        </div>
+        <pre><code class="blk">// Sending: attach where to navigate as data
+await Notifications.scheduleNotificationAsync({
+  content: { title: 'New order', data: { screen: 'OrderDetails', id: 42 } },
+  trigger: null,
+});
+
+// Handling tap: read it back and navigate
+Notifications.addNotificationResponseReceivedListener((res) =&gt; {
+  const { screen, id } = res.notification.request.content.data;
+  navigationRef.current?.navigate(screen, { id });
+});</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q146 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="146">
+        <div class="qn">146</div>
+        <h2 class="qt">What's the difference between the foreground listener and the response listener in expo-notifications?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>addNotificationReceivedListener</code> fires whenever a notification <strong>arrives</strong> while the app is in the foreground — regardless of whether the user ever interacts with it. <code>addNotificationResponseReceivedListener</code> fires only when the user actually <strong>taps</strong> on a notification (or one of its action buttons), whether the app was foregrounded, backgrounded, or had to be launched from quit. They answer two different questions: "a message just showed up" versus "the user just engaged with one" — and most apps need logic in both places for a complete experience.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Two Listener Types</span>
+        </div>
+        <pre><code class="blk">// "It arrived" — foreground only
+Notifications.addNotificationReceivedListener((n) =&gt; { /* show in-app toast */ });
+
+// "User tapped it" — any app state
+Notifications.addNotificationResponseReceivedListener((r) =&gt; { /* navigate */ });</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q147 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="147">
+        <div class="qn">147</div>
+        <h2 class="qt">How do you display a custom-styled notification with an image using Notifee?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Notifee's <code>displayNotification</code> accepts platform-specific style objects — on Android, you can set a <code>BigPictureStyle</code> with an image URI to show an expanded image when the notification is pulled down; on iOS, you attach an <code>attachments</code> array. This kind of rich-media notification (think a delivery app showing a photo of your food order) goes well beyond what plain title/body notifications can offer, and is one of the main reasons teams reach for Notifee over the more basic <code>expo-notifications</code> display API.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Image-Rich Notification</span>
+        </div>
+        <pre><code class="blk">await notifee.displayNotification({
+  title: 'Order on its way!',
+  body: 'Tap to track your delivery.',
+  android: {
+    channelId: 'default',
+    style: { type: AndroidStyle.BIGPICTURE, picture: 'https://example.com/food.jpg' },
+  },
+});</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q148 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="148">
+        <div class="qn">148</div>
+        <h2 class="qt">What is a "silent" / background data notification, and what is it used for?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>silent notification</strong> (a data-only FCM message with no visible title/body) wakes your app's background code briefly without showing anything to the user at all — commonly used to trigger a quiet background sync, refresh cached content, or update a badge count, so that the next time the user opens the app, everything already feels up to date. It's like a courier quietly restocking your fridge while you're out, rather than ringing the doorbell to tell you a delivery happened — the result (fresh content) is there, but there's no announcement.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSON · Silent Data-Only Payload</span>
+        </div>
+        <pre><code class="blk">{
+  "data": { "type": "background-sync" }
+  // No "notification" field → nothing visible appears to the user
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q149 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="149">
+        <div class="qn">149</div>
+        <h2 class="qt">How do you badge the app icon with an unread count?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">The small red number that appears on an app's home screen icon is called the <strong>badge count</strong>, and <code>expo-notifications</code> exposes a simple function to set it directly: <code>setBadgeCountAsync(number)</code>. You typically update this whenever your backend's unread count changes, or include a <code>badge</code> field directly in the push payload itself so the OS updates it automatically on delivery, without needing your app to even be running.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Setting the Badge Count</span>
+        </div>
+        <pre><code class="blk">import * as Notifications from 'expo-notifications';
+
+await Notifications.setBadgeCountAsync(5);   // shows "5" on the app icon
+await Notifications.setBadgeCountAsync(0);   // clears it once read</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q150 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="150">
+        <div class="qn">150</div>
+        <h2 class="qt">What are best practices for not annoying users with too many push notifications?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Always request permission contextually (right before a feature that genuinely needs it, not on app launch), give users granular in-app controls over which notification categories they receive (using Android channels to back this), avoid sending multiple separate notifications for closely-related events (group or batch them instead), and never send notifications purely for re-engagement marketing without real value to the user. Apps with high "notifications disabled" or uninstall rates very often trace back to notification fatigue — interviewers asking this question are checking that you think about UX, not just the technical mechanics of sending alerts.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Best Practices Checklist</span>
+        </div>
+        <pre><code class="blk">✅ Ask permission just-in-time, with a clear, contextual reason
+✅ Let users toggle categories (channels) on/off individually
+✅ Batch/group related alerts instead of firing several at once
+✅ Every notification should carry genuine value — not just "come back!"
+✅ Respect quiet hours / Do Not Disturb where relevant</code></pre>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer class="footer">
+  <div class="footer-card">
+    <span class="trophy">🏆</span>
+    <span class="done-badge">✅ All 5 Modules Complete</span>
+    <h3>150 / 150 Questions Done!</h3>
+    <p>You've covered Architecture &amp; Setup, Core UI &amp; Performance, the Modern Ecosystem, GPS &amp; Maps, and Push Notifications — the full beginner-to-interview-ready React Native curriculum. Great work seeing it through to the end. 🎉</p>
+  </div>
+</footer>
+
+</body>
+</html>

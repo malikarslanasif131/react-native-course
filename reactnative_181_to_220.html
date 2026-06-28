@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>React Native Prep · Bonus Module 2: Native Features, DX &amp; App Store Essentials (Q181–220)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+/* ── TOKENS ─────────────────────────────────────────────── */
+:root{
+  --ink:        #0c0d14;
+  --ink-2:      #3c3d50;
+  --ink-3:      #7b7d96;
+  --surface:    #ffffff;
+  --ground:     #f3f4f9;
+  --border:     #e4e5f0;
+  --accent:     #0f766e;   /* teal — distinguishes bonus module 2 */
+  --accent-lt:  #d8f5f0;
+  --accent-glow:rgba(15,118,110,.12);
+  --code-bg:    #0d1117;
+  --code-fg:    #c9d1d9;
+  --code-str:   #a5d6ff;
+  --code-cmt:   #484f58;
+  --r:          14px;
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:  0 4px 16px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.05);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,.09), 0 2px 6px rgba(0,0,0,.05);
+}
+
+/* ── RESET ──────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--ground);
+  color:var(--ink);
+  line-height:1.7;
+  min-height:100vh;
+  font-size:15px;
+}
+
+/* ── HERO ───────────────────────────────────────────────── */
+.hero{
+  background:linear-gradient(145deg,#022c22 0%,#064e3b 35%,#0f766e 70%,#14b8a6 100%);
+  padding:72px 24px 56px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+.hero::before{
+  content:'';
+  position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.15) 1px,transparent 1px);
+  background-size:28px 28px;
+  pointer-events:none;
+  z-index:0;
+}
+.hero::after{
+  content:'';
+  position:absolute;
+  bottom:-120px;right:-80px;
+  width:500px;height:500px;
+  border-radius:50%;
+  background:rgba(20,184,166,.25);
+  filter:blur(80px);
+  pointer-events:none;
+  z-index:0;
+}
+.hero > *{position:relative;z-index:1}
+.hero-eyebrow{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.7rem;
+  font-weight:700;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.55);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:99px;
+  padding:4px 16px;
+  margin-bottom:24px;
+}
+.hero h1{
+  font-size:clamp(2rem,5.5vw,3.25rem);
+  font-weight:900;
+  letter-spacing:-.035em;
+  color:#fff;
+  line-height:1.1;
+  margin-bottom:14px;
+}
+.hero-sub{
+  font-size:1rem;
+  color:rgba(255,255,255,.72);
+  max-width:600px;
+  margin:0 auto 32px;
+  font-weight:400;
+  line-height:1.65;
+}
+.chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.chip{
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.18);
+  color:rgba(255,255,255,.92);
+  padding:5px 16px;
+  border-radius:99px;
+  font-size:.75rem;
+  font-weight:600;
+  letter-spacing:.02em;
+  backdrop-filter:blur(8px);
+}
+
+/* ── PROGRESS STRIP ─────────────────────────────────────── */
+.progress-strip{
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  padding:14px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.ps-label{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.ps-bar{
+  width:200px;height:6px;
+  background:var(--border);
+  border-radius:99px;
+  overflow:hidden;
+}
+.ps-fill{
+  height:100%;
+  width:100%; /* 220/220 = 100% */
+  background:linear-gradient(90deg,#0f766e,#14b8a6);
+  border-radius:99px;
+  transition:width .4s ease;
+}
+.ps-count{font-size:.78rem;font-weight:600;color:var(--accent);font-family:'JetBrains Mono',monospace}
+
+/* ── LAYOUT ──────────────────────────────────────────────── */
+.container{
+  max-width:860px;
+  margin:0 auto;
+  padding:40px 20px 80px;
+}
+
+/* ── MODULE INTRO ────────────────────────────────────────── */
+.mod-intro{
+  background:var(--surface);
+  border-radius:var(--r);
+  padding:28px 32px;
+  margin-bottom:36px;
+  border-left:3px solid var(--accent);
+  box-shadow:var(--shadow-md);
+  display:flex;
+  gap:20px;
+  align-items:flex-start;
+}
+.mod-icon{
+  font-size:2rem;
+  flex-shrink:0;
+  margin-top:2px;
+  line-height:1;
+}
+.mod-intro-tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--accent);
+  background:var(--accent-lt);
+  padding:3px 10px;
+  border-radius:5px;
+  display:inline-block;
+  margin-bottom:10px;
+}
+.mod-intro p{color:var(--ink-2);font-size:.92rem;line-height:1.75}
+.mod-intro strong{color:var(--ink);font-weight:600}
+
+/* ── SUBSECTION DIVIDER ──────────────────────────────────── */
+.subhead{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:44px 0 18px;
+}
+.subhead:first-of-type{margin-top:0}
+.subhead .line{flex:1;height:1px;background:var(--border)}
+.subhead span{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.68rem;
+  font-weight:700;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--accent);
+  background:var(--accent-lt);
+  padding:5px 14px;
+  border-radius:99px;
+  white-space:nowrap;
+}
+
+/* ── QUESTION CARD ───────────────────────────────────────── */
+.card{
+  background:var(--surface);
+  border-radius:var(--r);
+  margin-bottom:20px;
+  box-shadow:var(--shadow-md);
+  border:1px solid var(--border);
+  overflow:hidden;
+  transition:box-shadow .2s ease, transform .2s ease;
+}
+.card:hover{
+  box-shadow:var(--shadow-lg);
+  transform:translateY(-1px);
+}
+
+.card-bar{
+  height:3px;
+  background:linear-gradient(90deg,var(--accent),#14b8a6);
+}
+
+.card-body{padding:28px 32px 32px}
+
+/* ── QUESTION HEADER ─────────────────────────────────────── */
+.qh{
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  margin-bottom:22px;
+  position:relative;
+}
+.qh::before{
+  content:attr(data-n);
+  font-family:'JetBrains Mono',monospace;
+  font-size:7rem;
+  font-weight:900;
+  color:var(--accent);
+  opacity:.04;
+  position:absolute;
+  top:-24px;right:-8px;
+  line-height:1;
+  pointer-events:none;
+  user-select:none;
+  letter-spacing:-.05em;
+}
+.qn{
+  flex-shrink:0;
+  width:40px;height:40px;
+  border-radius:10px;
+  background:linear-gradient(135deg,#0f766e,#14b8a6);
+  color:#fff;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.7rem;
+  font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  margin-top:3px;
+  box-shadow:0 2px 8px rgba(15,118,110,.35);
+}
+.qt{
+  font-size:1.03rem;
+  font-weight:700;
+  color:var(--ink);
+  line-height:1.45;
+  flex:1;
+}
+
+/* ── DIVIDER ─────────────────────────────────────────────── */
+.div{border:none;border-top:1px solid var(--border);margin:18px 0}
+
+/* ── SECTION LABEL ───────────────────────────────────────── */
+.lbl{
+  font-size:.63rem;
+  font-weight:800;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ink-3);
+  margin-bottom:8px;
+}
+
+/* ── ANSWER ──────────────────────────────────────────────── */
+.ans{
+  color:var(--ink-2);
+  font-size:.92rem;
+  line-height:1.82;
+}
+.ans strong{color:var(--ink);font-weight:600}
+.ans code{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.79rem;
+  background:#d8f5f0;
+  color:#0f5b54;
+  padding:1px 6px;
+  border-radius:4px;
+  font-weight:500;
+}
+
+/* ── CODE BLOCK ──────────────────────────────────────────── */
+.code-wrap{margin-top:22px}
+.cb-header{
+  background:#1c2030;
+  border-radius:10px 10px 0 0;
+  padding:9px 16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.dots{display:flex;gap:5px;flex-shrink:0}
+.dot{width:11px;height:11px;border-radius:50%}
+.dr{background:#ff5f57}.dy{background:#febc2e}.dg{background:#28c840}
+.lang-badge{
+  margin-left:auto;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.63rem;
+  color:#5d7080;
+  font-weight:600;
+  letter-spacing:.06em;
+}
+pre{
+  background:var(--code-bg);
+  border-radius:0 0 10px 10px;
+  padding:20px 22px;
+  overflow-x:auto;
+  margin:0;
+}
+code.blk{
+  font-family:'JetBrains Mono','Fira Code','Courier New',monospace;
+  font-size:.79rem;
+  line-height:1.75;
+  color:var(--code-fg);
+  white-space:pre;
+  display:block;
+}
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+.footer{text-align:center;padding:48px 20px 70px}
+.footer-card{
+  display:inline-block;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:32px 44px;
+  box-shadow:var(--shadow-lg);
+  max-width:500px;
+}
+.footer-card .done-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:#d8f5f0;color:#0f5b54;
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 12px;border-radius:99px;
+  margin-bottom:14px;
+}
+.footer-card h3{font-size:1.25rem;font-weight:800;color:var(--ink);margin-bottom:8px;letter-spacing:-.02em}
+.footer-card p{font-size:.9rem;color:var(--ink-2);line-height:1.7}
+.footer-card .trophy{font-size:2.5rem;margin-bottom:6px;display:block}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media(max-width:640px){
+  .hero{padding:52px 16px 44px}
+  .card-body{padding:22px 18px 24px}
+  .mod-intro{flex-direction:column;gap:12px;padding:20px 18px}
+  .qt{font-size:.95rem}
+  code.blk{font-size:.74rem}
+  .qh::before{font-size:5rem;top:-10px}
+  .footer-card{padding:26px 24px}
+  .subhead span{font-size:.62rem;padding:4px 10px}
+  .code-wrap {
+  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  display: block;
+}
+
+pre {
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+  display: inline-block;
+  min-width: 100%;
+}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HERO ══════════════ -->
+<header class="hero">
+  <p class="hero-eyebrow">React Native Interview Prep · Bonus Module 2 · 2026 Edition</p>
+  <h1>Native Features, DX &amp; App Store Essentials</h1>
+  <p class="hero-sub">Camera, Biometrics &amp; Native Device APIs · Forms, Validation &amp; Redux Toolkit · Error Tracking, TypeScript &amp; App Store Submission</p>
+  <div class="chips">
+    <span class="chip">🧰 Bonus Module 2</span>
+    <span class="chip">❓ Questions 181 – 220</span>
+    <span class="chip">🎯 Intermediate Level</span>
+    <span class="chip">⚡ 2026 Standards</span>
+  </div>
+</header>
+
+<!-- ══════════════ PROGRESS ══════════════ -->
+<div class="progress-strip">
+  <span class="ps-label">Overall Progress</span>
+  <div class="ps-bar"><div class="ps-fill"></div></div>
+  <span class="ps-count">220 / 220</span>
+</div>
+
+<!-- ══════════════ CONTENT ══════════════ -->
+<div class="container">
+
+  <div class="mod-intro">
+    <div class="mod-icon">🧰</div>
+    <div>
+      <span class="mod-intro-tag">Bonus Module 2 · Native Features, DX &amp; App Store Essentials</span>
+      <p>This second bonus module rounds out the picture with everything that turns a working app into a <strong>polished, shippable product</strong>: tapping into native device capabilities (camera, biometrics, haptics, file system), handling real-world forms and multiple languages, an alternative state-management option (Redux Toolkit), the developer-experience tools that keep a codebase healthy (TypeScript, ESLint, error tracking), and finally — the part many tutorials skip entirely — what it actually takes to submit an app to the App Store and Play Store.</p>
+    </div>
+  </div>
+
+  <div class="subhead"><div class="line"></div><span>State Management &amp; Forms</span><div class="line"></div></div>
+
+  <!-- ─── Q181 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="181">
+        <div class="qn">181</div>
+        <h2 class="qt">What is Redux Toolkit and how does it simplify Redux?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Redux Toolkit</strong> (often called RTK) is the officially recommended way to write Redux today — it wraps the classic Redux patterns (actions, reducers, store) in a much smaller, less repetitive API. Instead of hand-writing action type constants, action creators, and switch-statement reducers separately, RTK lets you define all three together in one place, and it includes sensible defaults (like Immer for "mutating" state safely) baked in. It's the difference between assembling furniture from 40 loose parts with a separate instruction booklet (classic Redux) versus a kit where most of the joints are pre-fitted and only need a few screws (RTK).</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · Install</span>
+        </div>
+        <pre><code class="blk">npm install @reduxjs/toolkit react-redux
+// Replaces hand-written actions + reducers + store setup with one API</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q182 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="182">
+        <div class="qn">182</div>
+        <h2 class="qt">What is createSlice in Redux Toolkit?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>createSlice</code> bundles together a piece of state's initial value, its reducer logic, and the action creators that trigger that logic — all generated automatically from one object you define. You write what looks like simple, "mutating" code inside each reducer function (e.g., <code>state.count += 1</code>), and RTK safely converts it into proper immutable updates behind the scenes using Immer. This collapses what used to be three separate files (action types, action creators, reducer) into a single, cohesive definition.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · createSlice</span>
+        </div>
+        <pre><code class="blk">import { createSlice } from '@reduxjs/toolkit';
+
+const counterSlice = createSlice({
+  name: 'counter',
+  initialState: { value: 0 },
+  reducers: {
+    increment: (state) =&gt; { state.value += 1; }, // looks mutating, isn't
+  },
+});
+
+export const { increment } = counterSlice.actions;
+export default counterSlice.reducer;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q183 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="183">
+        <div class="qn">183</div>
+        <h2 class="qt">What is RTK Query, and how does it relate to TanStack Query?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>RTK Query</strong> is Redux Toolkit's built-in solution for fetching and caching server data — solving the exact same "server state" problem TanStack Query does (caching, refetching, loading/error states), but integrated directly into the Redux store so the cached data lives alongside your other Redux state. If a team is already committed to Redux for client state, RTK Query avoids introducing a second, separate data-fetching library; if a team has no Redux dependency at all, TanStack Query alone is usually simpler to adopt. They solve the same problem from two different architectural starting points.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · RTK Query Endpoint</span>
+        </div>
+        <pre><code class="blk">import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+
+export const api = createApi({
+  baseQuery: fetchBaseQuery({ baseUrl: 'https://api.example.com' }),
+  endpoints: (builder) =&gt; ({
+    getUsers: builder.query({ query: () =&gt; 'users' }),
+  }),
+});
+
+export const { useGetUsersQuery } = api; // generated hook, just like useQuery</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q184 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="184">
+        <div class="qn">184</div>
+        <h2 class="qt">What is react-hook-form and why is it popular for forms in React Native?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>react-hook-form</strong> manages form state and validation while minimizing re-renders — instead of a re-render on every single keystroke across every field (which manual <code>useState</code> per field would cause), it tracks input values internally via refs and only re-renders when truly necessary, like on submit or validation error. You register each field with its <code>control</code>/<code>register</code> API, and it handles gathering values, running validation, and reporting errors for you. For forms with many fields, this can meaningfully improve performance compared to wiring up individual state for every input by hand.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Basic react-hook-form</span>
+        </div>
+        <pre><code class="blk">import { useForm, Controller } from 'react-hook-form';
+
+const { control, handleSubmit } = useForm();
+
+&lt;Controller
+  control={control}
+  name="email"
+  render={({ field }) =&gt; &lt;TextInput value={field.value} onChangeText={field.onChange} /&gt;}
+/&gt;
+&lt;Button onPress={handleSubmit((data) =&gt; console.log(data))} title="Submit" /&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q185 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="185">
+        <div class="qn">185</div>
+        <h2 class="qt">What is form validation with Zod, and how does it pair with react-hook-form?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Zod</strong> is a schema-validation library — you describe the exact "shape" your data should have (a string, an email format, a number with a minimum) once, and Zod can validate any object against it, producing clear error messages when something doesn't match. Paired with react-hook-form via a resolver, your validation rules live in one declarative schema instead of scattered conditional checks throughout your form's JSX — the form library handles re-render efficiency, and Zod handles "is this data actually valid," each doing the job it's best at.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Zod + react-hook-form</span>
+        </div>
+        <pre><code class="blk">import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+const schema = z.object({
+  email: z.string().email('Invalid email address'),
+});
+
+const { control } = useForm({ resolver: zodResolver(schema) });</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="subhead"><div class="line"></div><span>Internationalization</span><div class="line"></div></div>
+
+  <!-- ─── Q186 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="186">
+        <div class="qn">186</div>
+        <h2 class="qt">What is i18n (internationalization), and how do you implement it in React Native?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>i18n</strong> is the practice of structuring your app so its text can be displayed in multiple languages without rewriting components — every piece of user-facing text is replaced with a "key" (like <code>welcome.title</code>), and a translation file maps that key to the actual phrase in each supported language. A library like <code>i18next</code> (with <code>react-i18next</code>) handles loading the right translation file and gives you a <code>t()</code> function to look up the current phrase by key, anywhere in your component tree.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Using a Translation Key</span>
+        </div>
+        <pre><code class="blk">import { useTranslation } from 'react-i18next';
+
+function Welcome() {
+  const { t } = useTranslation();
+  return &lt;Text&gt;{t('welcome.title')}&lt;/Text&gt;;
+  // en.json: { "welcome": { "title": "Welcome!" } }
+  // fr.json: { "welcome": { "title": "Bienvenue !" } }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q187 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="187">
+        <div class="qn">187</div>
+        <h2 class="qt">How does expo-localization help detect a user's locale and preferred language?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>expo-localization</code> reads the device's own system settings — the language and region the user has already configured on their phone — so your app can automatically pick a sensible default language on first launch, rather than forcing the user to manually select one. It returns details like the device's locale code (<code>en-US</code>, <code>fr-FR</code>) and calendar/region preferences, which you typically feed straight into your i18n library's initial language setting.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Reading Device Locale</span>
+        </div>
+        <pre><code class="blk">import * as Localization from 'expo-localization';
+
+console.log(Localization.locale);       // e.g. "en-US"
+console.log(Localization.locales);      // user's full preference list
+
+i18n.changeLanguage(Localization.locale.split('-')[0]); // "en"</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="subhead"><div class="line"></div><span>Native Device Capabilities</span><div class="line"></div></div>
+
+  <!-- ─── Q188 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="188">
+        <div class="qn">188</div>
+        <h2 class="qt">What is expo-camera and how do you take a photo with it?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>expo-camera</code> renders a live camera preview directly inside your app's UI and gives you a method to capture a still photo (or record video) from that feed, after requesting camera permission. You attach a ref to the <code>&lt;CameraView&gt;</code> component, and calling <code>takePictureAsync()</code> on it returns the captured photo's local file URI, which you can then display, upload, or save. It's the building block behind any in-app photo capture feature — profile pictures, document scanning, social posts.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Capturing a Photo</span>
+        </div>
+        <pre><code class="blk">import { CameraView } from 'expo-camera';
+
+const cameraRef = useRef(null);
+
+async function takePhoto() {
+  const photo = await cameraRef.current.takePictureAsync();
+  console.log(photo.uri); // local file path to the captured image
+}
+
+&lt;CameraView ref={cameraRef} style={{ flex: 1 }} /&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q189 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="189">
+        <div class="qn">189</div>
+        <h2 class="qt">What is expo-image-picker and how do you let a user choose a photo from their library?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>expo-image-picker</code> opens the device's native photo/video library picker (or the camera directly) and resolves with the file the user selected — no custom UI needed, since it's the same familiar gallery interface the user already knows from their phone's Photos app. This requires media library permission first, and the result includes the selected asset's local URI, dimensions, and file type, ready to upload or display.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Picking an Image</span>
+        </div>
+        <pre><code class="blk">import * as ImagePicker from 'expo-image-picker';
+
+const result = await ImagePicker.launchImageLibraryAsync({
+  mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  quality: 0.8,
+});
+
+if (!result.canceled) {
+  console.log(result.assets[0].uri);
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q190 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="190">
+        <div class="qn">190</div>
+        <h2 class="qt">How do you scan a QR code or barcode in React Native?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Barcode/QR scanning is built directly into the same <code>expo-camera</code> module used for photos — you pass an <code>onBarcodeScanned</code> callback and a list of <code>barcodeTypes</code> to scan for, and the camera view automatically fires that callback the instant it recognizes a matching pattern in the live feed, returning the decoded string data. There's no separate "scanning engine" you need to manage — the camera component is doing real-time image analysis on every frame internally.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · QR Scanning</span>
+        </div>
+        <pre><code class="blk">&lt;CameraView
+  style={{ flex: 1 }}
+  barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+  onBarcodeScanned={({ data }) =&gt; {
+    console.log('Scanned:', data); // the decoded QR string
+  }}
+/&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q191 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="191">
+        <div class="qn">191</div>
+        <h2 class="qt">What is expo-local-authentication and how do you trigger Face ID/Touch ID?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>expo-local-authentication</code> taps into the device's built-in biometric hardware — Face ID or Touch ID on iOS, fingerprint or face unlock on Android — letting your app prompt the user to authenticate without ever seeing or handling the actual biometric data itself (that stays sealed inside the device's secure hardware). You first check <code>hasHardwareAsync()</code> and <code>isEnrolledAsync()</code> to confirm the device supports it and the user has set it up, then call <code>authenticateAsync()</code> to show the native prompt and get a pass/fail result.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Triggering Biometric Auth</span>
+        </div>
+        <pre><code class="blk">import * as LocalAuthentication from 'expo-local-authentication';
+
+const result = await LocalAuthentication.authenticateAsync({
+  promptMessage: 'Unlock with Face ID',
+});
+
+if (result.success) {
+  // Proceed — user verified biometrically
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q192 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="192">
+        <div class="qn">192</div>
+        <h2 class="qt">What is expo-haptics, and when should you use haptic feedback?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>expo-haptics</code> triggers the device's small physical vibration motor in different patterns — a light tap, a medium thud, a success/warning/error "buzz" — to give the user a physical confirmation that something happened, supplementing (not replacing) visual feedback. Good use cases: confirming a successful form submission, signaling an error, or giving tactile feedback on a custom slider/switch. Overusing it on every minor interaction quickly feels gimmicky or annoying, so it's best reserved for genuinely meaningful moments.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Triggering Haptic Feedback</span>
+        </div>
+        <pre><code class="blk">import * as Haptics from 'expo-haptics';
+
+await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q193 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="193">
+        <div class="qn">193</div>
+        <h2 class="qt">What is expo-clipboard, and how do you copy/paste text?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>expo-clipboard</code> reads from and writes to the device's system clipboard — the same shared clipboard the user's keyboard "paste" action uses. <code>setStringAsync()</code> copies a string onto the clipboard (e.g., "Copy referral code" buttons), and <code>getStringAsync()</code> reads back whatever's currently there. It's a small but commonly requested feature, especially for sharing codes, links, or copied confirmation numbers.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Copy & Read Clipboard</span>
+        </div>
+        <pre><code class="blk">import * as Clipboard from 'expo-clipboard';
+
+await Clipboard.setStringAsync('REF-12345');     // copy
+const text = await Clipboard.getStringAsync();   // read back</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q194 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="194">
+        <div class="qn">194</div>
+        <h2 class="qt">What is expo-file-system used for?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>expo-file-system</code> lets you read, write, move, copy, and delete files directly on the device's local storage — useful for caching downloaded data, saving a generated PDF, or storing larger files that don't belong in a simple key-value store like AsyncStorage. It exposes paths to safe, sandboxed app-specific directories (a "documents" directory and a "cache" directory) so you're not poking around the rest of the device's file system, which the OS wouldn't allow anyway for security reasons.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Writing & Reading a File</span>
+        </div>
+        <pre><code class="blk">import * as FileSystem from 'expo-file-system';
+
+const path = FileSystem.documentDirectory + 'notes.txt';
+await FileSystem.writeAsStringAsync(path, 'Hello, file system!');
+const contents = await FileSystem.readAsStringAsync(path);</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q195 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="195">
+        <div class="qn">195</div>
+        <h2 class="qt">What is expo-sharing and how do you let users share content from your app?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>expo-sharing</code> opens the device's native share sheet — the same panel that pops up when sharing a photo or link from any app, listing Messages, Mail, social apps, AirDrop, etc. You give it a local file URI (an image, PDF, or other document already saved on-device), and the OS handles presenting all the apps capable of receiving that file type, with zero custom UI needed on your end. It's a thin wrapper that hands the entire "who do you want to share this with" decision over to the platform's own polished, familiar interface.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Native Share Sheet</span>
+        </div>
+        <pre><code class="blk">import * as Sharing from 'expo-sharing';
+
+if (await Sharing.isAvailableAsync()) {
+  await Sharing.shareAsync(fileUri); // opens native share sheet
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q196 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="196">
+        <div class="qn">196</div>
+        <h2 class="qt">What is expo-av (or expo-audio/expo-video) used for?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">These modules provide native audio and video playback and recording — playing a sound effect, streaming a video file, or recording audio from the microphone — wrapping the platform's underlying media engines so you don't write any native code yourself. A <code>Video</code> component renders a playable video surface with standard controls (play, pause, seek), while the audio APIs let you load and play sound files programmatically, useful for things like in-app notification chimes or short voice message playback.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Basic Video Playback</span>
+        </div>
+        <pre><code class="blk">import { useVideoPlayer, VideoView } from 'expo-video';
+
+const player = useVideoPlayer(videoSource, (p) =&gt; { p.play(); });
+
+&lt;VideoView player={player} style={{ width: '100%', height: 220 }} /&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="subhead"><div class="line"></div><span>UI Polish &amp; Visuals</span><div class="line"></div></div>
+
+  <!-- ─── Q197 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="197">
+        <div class="qn">197</div>
+        <h2 class="qt">What is @gorhom/bottom-sheet, and why is it preferred over a custom Modal for this pattern?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>bottom sheet</strong> is a panel that slides up from the bottom of the screen and can be dragged up/down or snapped to different height "stops" — common in apps like Maps or Uber for showing details without leaving the current screen. <code>@gorhom/bottom-sheet</code> handles the tricky gesture physics (drag velocity, snap points, backdrop dimming, keyboard avoidance) that would be genuinely difficult to build correctly from scratch with a plain <code>Modal</code>, which has no built-in concept of partial height or drag-to-resize at all.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Basic Bottom Sheet</span>
+        </div>
+        <pre><code class="blk">import BottomSheet from '@gorhom/bottom-sheet';
+
+const sheetRef = useRef(null);
+
+&lt;BottomSheet ref={sheetRef} snapPoints={['25%', '50%', '90%']}&gt;
+  &lt;Text&gt;Drag me up and down!&lt;/Text&gt;
+&lt;/BottomSheet&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q198 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="198">
+        <div class="qn">198</div>
+        <h2 class="qt">What is a Toast/Snackbar, and how do you implement one in React Native?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>Toast</strong> (or Snackbar) is a small, temporary message that appears briefly — usually near the top or bottom of the screen — to confirm an action ("Item added to cart") without interrupting the user or requiring a tap to dismiss it. React Native has no built-in cross-platform Toast component (Android has a native one, but iOS has none), so most apps use a library like <code>react-native-toast-message</code> that renders a consistent, custom-styled version across both platforms and auto-dismisses after a short timer.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Showing a Toast</span>
+        </div>
+        <pre><code class="blk">import Toast from 'react-native-toast-message';
+
+Toast.show({
+  type: 'success',
+  text1: 'Added to cart!',
+});
+
+// Once near the app root: &lt;Toast /&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q199 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="199">
+        <div class="qn">199</div>
+        <h2 class="qt">What is Lottie and how do you play a Lottie animation in React Native?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Lottie</strong> is a format for vector animations exported from Adobe After Effects (typically by a designer) as a small JSON file, which <code>lottie-react-native</code> can then play back natively at full quality and smooth frame rates — without anyone writing a single line of animation code. It's how apps get those polished, complex onboarding illustrations or success checkmarks that would be impractical to hand-build with the Animated API, since a designer can iterate on the animation entirely outside the codebase.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Playing a Lottie File</span>
+        </div>
+        <pre><code class="blk">import LottieView from 'lottie-react-native';
+
+&lt;LottieView
+  source={require('./success-check.json')}
+  autoPlay
+  loop={false}
+  style={{ width: 150, height: 150 }}
+/&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q200 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="200">
+        <div class="qn">200</div>
+        <h2 class="qt">What is react-native-svg, and why can't you just use a normal &lt;img&gt; tag for SVGs?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">React Native has no concept of an <code>&lt;img&gt;</code> tag or a browser's SVG rendering engine at all — the platform's <code>Image</code> component can only display raster formats like PNG or JPEG. <code>react-native-svg</code> provides actual native SVG-drawing components (<code>&lt;Svg&gt;</code>, <code>&lt;Path&gt;</code>, <code>&lt;Circle&gt;</code>) that render vector graphics directly using native drawing APIs — letting icons and illustrations stay crisp at any size and remain easy to recolor programmatically, unlike a fixed-resolution bitmap.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Drawing an SVG Shape</span>
+        </div>
+        <pre><code class="blk">import { Svg, Circle } from 'react-native-svg';
+
+&lt;Svg height="100" width="100"&gt;
+  &lt;Circle cx="50" cy="50" r="40" fill="#0f766e" /&gt;
+&lt;/Svg&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q201 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="201">
+        <div class="qn">201</div>
+        <h2 class="qt">What is expo-splash-screen, and how do you control when it hides?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">The <strong>splash screen</strong> is the branded image shown the instant an app launches, while JavaScript is still loading and initializing. By default it auto-hides as soon as the app is ready to render, but <code>expo-splash-screen</code> lets you explicitly <code>preventAutoHideAsync()</code> and only call <code>hideAsync()</code> once your own setup (like fetching a user's auth state or loading fonts) has genuinely finished — avoiding an awkward flash of unstyled or empty content sneaking through before your app is truly ready to be seen.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Manual Splash Control</span>
+        </div>
+        <pre><code class="blk">import * as SplashScreen from 'expo-splash-screen';
+
+SplashScreen.preventAutoHideAsync();
+
+async function prepareApp() {
+  await loadFontsAndAuth();
+  await SplashScreen.hideAsync(); // only now, once truly ready
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q202 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="202">
+        <div class="qn">202</div>
+        <h2 class="qt">What is expo-status-bar, and how do you customize the status bar?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">The <strong>status bar</strong> is the strip at the very top of the screen showing the time, battery, and signal icons — and its text color needs to contrast correctly against whatever your app's top content looks like. <code>expo-status-bar</code> lets you control its style (<code>light</code> text for dark backgrounds, <code>dark</code> text for light backgrounds), whether it's hidden entirely, and its background color (Android) — usually set once near the root of your app, or changed per-screen if different screens have very different background colors.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Setting Status Bar Style</span>
+        </div>
+        <pre><code class="blk">import { StatusBar } from 'expo-status-bar';
+
+&lt;StatusBar style="light" backgroundColor="#0f766e" /&gt;
+// light text on a dark/colored top bar — readable, intentional</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q203 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="203">
+        <div class="qn">203</div>
+        <h2 class="qt">How do you load custom fonts with expo-font?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Custom font files (.ttf/.otf) must be explicitly loaded before they can be referenced by name in a <code>fontFamily</code> style — unlike the web, where a font simply downloads and applies whenever it's ready. The <code>useFonts</code> hook from <code>expo-font</code> takes a map of font names to local file paths, and returns a boolean once loading is complete; you typically gate your entire app's render behind that boolean (often paired with the splash screen staying visible) so no text ever flashes briefly in the wrong default font.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · useFonts Hook</span>
+        </div>
+        <pre><code class="blk">import { useFonts } from 'expo-font';
+
+const [loaded] = useFonts({
+  'Poppins-Bold': require('./assets/fonts/Poppins-Bold.ttf'),
+});
+
+if (!loaded) return null; // wait until fonts are ready
+&lt;Text style={{ fontFamily: 'Poppins-Bold' }}&gt;Styled Text&lt;/Text&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q204 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="204">
+        <div class="qn">204</div>
+        <h2 class="qt">What is expo-screen-orientation used for?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>expo-screen-orientation</code> lets you programmatically lock an app (or a single screen) to a specific orientation — portrait-only, landscape-only, or allow both and respond to changes between them. This matters for things like a video player you want to allow rotating to landscape for full-screen viewing while keeping the rest of the app locked to portrait, or a game that's specifically designed for landscape play only.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Locking Orientation</span>
+        </div>
+        <pre><code class="blk">import * as ScreenOrientation from 'expo-screen-orientation';
+
+await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+// later, when leaving the video screen:
+await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="subhead"><div class="line"></div><span>Error Tracking &amp; Code Quality</span><div class="line"></div></div>
+
+  <!-- ─── Q205 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="205">
+        <div class="qn">205</div>
+        <h2 class="qt">What is an Error Boundary in React, and how does it work in React Native?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">An <strong>Error Boundary</strong> is a special class component that catches JavaScript errors thrown anywhere in its child component tree during rendering, preventing the entire app from crashing to a blank white screen — instead, it can render a friendly fallback UI ("Something went wrong, please restart"). It works identically in React Native as it does on the web, using the same <code>static getDerivedStateFromError</code> / <code>componentDidCatch</code> lifecycle methods, since this is a React-level (not platform-level) mechanism.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Basic Error Boundary</span>
+        </div>
+        <pre><code class="blk">class ErrorBoundary extends React.Component {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError) return &lt;Text&gt;Something went wrong.&lt;/Text&gt;;
+    return this.props.children;
+  }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q206 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="206">
+        <div class="qn">206</div>
+        <h2 class="qt">What is Sentry, and why would you add crash/error reporting to a React Native app?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Sentry</strong> is a third-party error-tracking service that automatically captures crashes and unhandled exceptions happening on real users' devices in production — including the full stack trace, device info, and the steps leading up to it — and sends them to a dashboard your team can review. Without it, you'd be entirely blind to bugs that only surface on specific devices or OS versions you don't personally own; with it, you often learn about and can fix a crash before users even bother reporting it themselves.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Sentry Initialization</span>
+        </div>
+        <pre><code class="blk">import * as Sentry from '@sentry/react-native';
+
+Sentry.init({ dsn: 'https://your-dsn@sentry.io/project' });
+// Uncaught errors anywhere in the app now get reported automatically</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q207 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="207">
+        <div class="qn">207</div>
+        <h2 class="qt">What is Firebase Crashlytics, and how does it differ from Sentry?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Crashlytics</strong> is Google's free crash-reporting tool, tightly integrated with the rest of Firebase (the same project you'd already use for FCM push notifications). It excels specifically at catching <strong>native-level</strong> crashes (a hard app crash, not just a caught JS exception) and is often the simpler default choice if your app already uses Firebase for other services. Sentry tends to offer richer JavaScript-specific tooling (source map support, release tracking, performance monitoring) and works equally well whether or not you use Firebase at all — the choice often comes down to which ecosystem the rest of your stack already lives in.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Sentry vs Crashlytics</span>
+        </div>
+        <pre><code class="blk">Sentry        → richer JS tooling, release/source map support, vendor-neutral
+Crashlytics   → free, bundled with Firebase, strong native-crash detection
+// Many teams use both — they catch slightly different failure types</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q208 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="208">
+        <div class="qn">208</div>
+        <h2 class="qt">Why is TypeScript commonly used in React Native projects, and what does it actually catch?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>TypeScript</strong> adds static type checking on top of JavaScript — you describe the expected "shape" of your data (a function's parameters, a component's props, an API response), and your editor/build process flags mismatches <em>before</em> the app ever runs, rather than discovering them as a runtime crash on a user's device. Common things it catches: passing the wrong type of prop to a component, typos in object keys, forgetting to handle a possible <code>null</code>/<code>undefined</code> value, or calling a function with the wrong number of arguments. It's now the default for new Expo/React Native projects rather than an optional add-on.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">TS · Catching a Bug Before Runtime</span>
+        </div>
+        <pre><code class="blk">type UserCardProps = { name: string; age: number };
+
+function UserCard({ name, age }: UserCardProps) {
+  return &lt;Text&gt;{name} is {age}&lt;/Text&gt;;
+}
+
+&lt;UserCard name="Sam" age="twenty" /&gt;
+// ❌ TypeScript error caught immediately: age expects a number, not a string</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q209 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="209">
+        <div class="qn">209</div>
+        <h2 class="qt">What do ESLint and Prettier do, and why use both together?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>ESLint</strong> analyzes your code for potential bugs and bad practices — an unused variable, a missing dependency in a <code>useEffect</code>, a possible infinite loop pattern — flagging issues that could cause real problems. <strong>Prettier</strong> is purely about formatting: consistent indentation, quote style, line length — it has no opinion on whether your logic is correct, only on how it looks. Running both together means ESLint focuses entirely on catching real bugs while Prettier handles all formatting bickering automatically, so teams stop arguing over tabs-vs-spaces in code review.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Different Jobs</span>
+        </div>
+        <pre><code class="blk">ESLint:    "This variable is never used" — catches LOGIC issues
+Prettier:  "This line should use double quotes, not single" — FORMATTING only
+// Together: clean code AND consistent style, with no manual nagging</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q210 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="210">
+        <div class="qn">210</div>
+        <h2 class="qt">What are common causes of memory leaks in React Native apps?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">The most frequent culprit is forgetting to clean up a subscription, listener, or timer when a component unmounts — a <code>setInterval</code>, a location watch, an event listener, or a still-pending network request that calls <code>setState</code> after the component is already gone, which can also throw a "cannot update an unmounted component" warning. The fix is almost always the same pattern: return a cleanup function from <code>useEffect</code> that cancels/removes whatever was set up, ensuring nothing keeps running or holding memory once a screen is no longer in use.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · The Cleanup Pattern</span>
+        </div>
+        <pre><code class="blk">useEffect(() =&gt; {
+  const interval = setInterval(() =&gt; console.log('tick'), 1000);
+  const sub = someAPI.subscribe(handleEvent);
+
+  return () =&gt; {            // ✅ ALWAYS clean up
+    clearInterval(interval);
+    sub.unsubscribe();
+  };
+}, []);</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q211 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="211">
+        <div class="qn">211</div>
+        <h2 class="qt">What are some techniques for reducing React Native app bundle size?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Common techniques include: enabling Hermes (its bytecode format is more compact than raw JS), removing unused dependencies and dead code, compressing image assets and using appropriately-sized images rather than oversized originals, lazy-loading screens/features that aren't needed immediately rather than bundling everything upfront, and avoiding accidentally importing an entire library when you only need one small function from it (checking for tree-shaking support). A smaller bundle means faster downloads, faster installs, and often faster app startup too.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Bundle Size Checklist</span>
+        </div>
+        <pre><code class="blk">✅ Hermes enabled (smaller bytecode vs raw JS parsing)
+✅ Remove unused npm packages and dead code
+✅ Compress/resize image assets appropriately
+✅ Lazy-load screens not needed on first launch
+✅ Import only what you need: { debounce } from 'lodash-es', not all of lodash</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="subhead"><div class="line"></div><span>Auth, Payments &amp; Background Work</span><div class="line"></div></div>
+
+  <!-- ─── Q212 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="212">
+        <div class="qn">212</div>
+        <h2 class="qt">What is OAuth-based social login, and how does expo-auth-session help implement it?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>OAuth</strong> social login lets users sign in using an existing account (Google, GitHub, etc.) without ever typing a new password into your app — your app redirects the user to the provider's own login page, the user authenticates there, and the provider redirects back with proof of identity (a token) your app can trust. <code>expo-auth-session</code> handles the tricky parts of this flow on mobile — opening the provider's login page in a secure in-app browser, capturing the redirect back into your app, and exchanging the authorization code for a usable token.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Basic Auth Session Flow</span>
+        </div>
+        <pre><code class="blk">import * as AuthSession from 'expo-auth-session';
+
+const result = await AuthSession.startAsync({
+  authUrl: 'https://provider.com/oauth/authorize?...',
+});
+// result contains the auth code/token once the user signs in &amp; redirects back</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q213 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="213">
+        <div class="qn">213</div>
+        <h2 class="qt">What is "Sign in with Apple," and when is it required?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Apple's own privacy-focused sign-in option (similar in spirit to "Sign in with Google") lets users authenticate using their Apple ID, optionally hiding their real email behind a private relay address. Apple's App Store guidelines <strong>require</strong> offering Sign in with Apple as an option if your app offers any other third-party social login (like Google or Facebook) — you can't offer Google sign-in alone without also providing Apple's equivalent, making this one of the few login methods that isn't purely optional for many apps targeting iOS.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Sign in with Apple</span>
+        </div>
+        <pre><code class="blk">import * as AppleAuthentication from 'expo-apple-authentication';
+
+const credential = await AppleAuthentication.signInAsync({
+  requestedScopes: [
+    AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+    AppleAuthentication.AppleAuthenticationScope.EMAIL,
+  ],
+});</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q214 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="214">
+        <div class="qn">214</div>
+        <h2 class="qt">What are in-app purchases, and what does a library like RevenueCat provide?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>In-app purchases (IAP)</strong> let users buy digital goods or subscriptions directly inside your app, processed through Apple's or Google's own payment systems (required by store policy for digital goods — you generally can't route around them with your own payment processor for this category). Handling raw IAP APIs directly is notoriously fiddly across both platforms; <strong>RevenueCat</strong> is a popular service that wraps both platforms' purchase APIs into one consistent interface, handles receipt validation on its servers, and gives you a dashboard for subscription analytics — saving teams from re-implementing a lot of error-prone payment plumbing themselves.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · RevenueCat Purchase Flow</span>
+        </div>
+        <pre><code class="blk">import Purchases from 'react-native-purchases';
+
+const offerings = await Purchases.getOfferings();
+const purchase = await Purchases.purchasePackage(offerings.current.monthly);
+// RevenueCat handles receipt validation + cross-platform entitlement tracking</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q215 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="215">
+        <div class="qn">215</div>
+        <h2 class="qt">What is the Linking API used for besides deep linking into your own app?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">React Native's built-in <code>Linking</code> module also lets your app open <strong>other</strong> apps and system features by URL — opening a web page in the device's browser, launching the phone dialer with a number pre-filled, opening the Mail app with a draft email, or opening another installed app via its own custom URL scheme. It's the same general mechanism deep linking uses, just pointed outward instead of inward — your app handing off to somewhere else, rather than receiving a handoff.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Opening External Apps</span>
+        </div>
+        <pre><code class="blk">import { Linking } from 'react-native';
+
+Linking.openURL('https://example.com');         // opens browser
+Linking.openURL('tel:+15551234567');            // opens dialer
+Linking.openURL('mailto:hello@example.com');    // opens mail composer</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q216 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="216">
+        <div class="qn">216</div>
+        <h2 class="qt">What is a background task (expo-background-fetch / expo-task-manager), and what are its limitations?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Background tasks let your app run a small piece of JavaScript periodically even when it's not open — useful for syncing data or checking for updates without requiring the user to manually reopen the app. <code>expo-task-manager</code> registers the task, and <code>expo-background-fetch</code> schedules it to run roughly every so often. The key limitation: both iOS and Android tightly control background execution to protect battery life — your task isn't guaranteed to run at an exact interval, may be skipped entirely under low-battery or restrictive conditions, and typically has only a short window (a few seconds to a couple minutes) to do its work before being forcibly suspended.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Registering a Background Task</span>
+        </div>
+        <pre><code class="blk">import * as TaskManager from 'expo-task-manager';
+import * as BackgroundFetch from 'expo-background-fetch';
+
+TaskManager.defineTask('SYNC_TASK', async () =&gt; {
+  await syncLatestData();
+  return BackgroundFetch.BackgroundFetchResult.NewData;
+});
+
+await BackgroundFetch.registerTaskAsync('SYNC_TASK', { minimumInterval: 900 });
+// "Every ~15 min" is a request, not a guarantee — the OS decides the real timing</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="subhead"><div class="line"></div><span>Code Organization &amp; Submission</span><div class="line"></div></div>
+
+  <!-- ─── Q217 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="217">
+        <div class="qn">217</div>
+        <h2 class="qt">What is a custom hook, and why would you extract one?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>custom hook</strong> is simply a regular JavaScript function (whose name starts with <code>use</code>, by convention) that calls other React hooks internally — letting you package up a reusable piece of stateful logic (like "fetch and track loading state for X" or "subscribe to network connectivity") once, and reuse it across multiple components without copy-pasting the same <code>useState</code>/<code>useEffect</code> combination everywhere. It's the modern replacement for the older Higher-Order Component pattern, and is generally considered easier to read and compose.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · A Reusable Custom Hook</span>
+        </div>
+        <pre><code class="blk">function useNetworkStatus() {
+  const [isConnected, setIsConnected] = useState(true);
+  useEffect(() =&gt; {
+    const sub = NetInfo.addEventListener((state) =&gt; setIsConnected(state.isConnected));
+    return () =&gt; sub();
+  }, []);
+  return isConnected;
+}
+
+// Reused anywhere: const isConnected = useNetworkStatus();</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q218 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="218">
+        <div class="qn">218</div>
+        <h2 class="qt">What is the App Store Connect / Google Play Console review process like for a new submission?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">After building your app (typically via <code>eas build</code>) and uploading it, you fill out store-listing metadata (screenshots, description, privacy policy URL, content rating) inside <strong>App Store Connect</strong> (Apple) or <strong>Google Play Console</strong> (Android), then submit for review. Apple's review is manual and can take anywhere from a few hours to a few days, scrutinizing functionality, permission justifications, and guideline compliance fairly strictly — rejections for vague reasons aren't uncommon. Google's review is largely automated and generally faster, though policy violations (especially around sensitive permissions like background location) still trigger manual scrutiny on both platforms.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · Build & Submit via EAS</span>
+        </div>
+        <pre><code class="blk">eas build --platform ios --profile production
+eas submit --platform ios
+// Similarly for Android with --platform android</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q219 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="219">
+        <div class="qn">219</div>
+        <h2 class="qt">What is "runtimeVersion" and update channels in EAS, and why do they matter for OTA updates?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Since OTA (EAS) updates can only ship JS-only changes, EAS needs a way to guarantee a given JS bundle is actually compatible with the native code already installed on a user's device — that's what <code>runtimeVersion</code> tracks: devices only receive OTA updates that match their installed native runtime, preventing a mismatch crash. <strong>Channels</strong> (like "production," "preview," "staging") let you target different groups of builds with different updates — so you can push a fix to internal testers on a "preview" channel without it touching real production users at all, until you're confident and promote it.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · Channel-Targeted Update</span>
+        </div>
+        <pre><code class="blk">eas update --branch preview --message "Testing new checkout flow"
+// Only devices built with channel "preview" pointing to this branch receive it
+// runtimeVersion ensures it only applies to a compatible native build</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q220 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="220">
+        <div class="qn">220</div>
+        <h2 class="qt">What are adaptive icons, and how do app icon/splash configurations differ across platforms?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">iOS expects a single, fixed-shape square icon image that the OS automatically masks into a rounded square. Android, however, uses <strong>adaptive icons</strong> — you supply a separate foreground layer (your logo/symbol) and a background layer, and the OS dynamically applies different mask shapes (circle, squircle, rounded square) depending on the device manufacturer's launcher theme, so your icon looks correct everywhere instead of being clipped oddly. In a Managed Expo project, both are configured declaratively inside <code>app.json</code> rather than manually placed into native image asset folders.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSON · Icon Config in app.json</span>
+        </div>
+        <pre><code class="blk">{
+  "expo": {
+    "icon": "./assets/icon.png",
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0f766e"
+      }
+    }
+  }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer class="footer">
+  <div class="footer-card">
+    <span class="trophy">🏆</span>
+    <span class="done-badge">✅ Bonus Module 2 Complete</span>
+    <h3>220 / 220 Questions Done!</h3>
+    <p>Between the original 5-module curriculum and these two bonus modules, you've now covered fundamentals, native device APIs, advanced architecture, state management options, forms &amp; i18n, DX tooling, and the real-world App Store submission process. That's about as thorough a React Native interview foundation as a self-study plan gets. 🎉</p>
+  </div>
+</footer>
+
+</body>
+</html>

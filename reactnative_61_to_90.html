@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>React Native Prep · Module 3: Ecosystem &amp; Modern Libraries (Q61–90)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+/* ── TOKENS ─────────────────────────────────────────────── */
+:root{
+  --ink:        #0c0d14;
+  --ink-2:      #3c3d50;
+  --ink-3:      #7b7d96;
+  --surface:    #ffffff;
+  --ground:     #f3f4f9;
+  --border:     #e4e5f0;
+  --accent:     #4338ca;
+  --accent-lt:  #eef0fd;
+  --accent-glow:rgba(67,56,202,.12);
+  --code-bg:    #0d1117;
+  --code-fg:    #c9d1d9;
+  --code-str:   #a5d6ff;
+  --code-cmt:   #484f58;
+  --r:          14px;
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:  0 4px 16px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.05);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,.09), 0 2px 6px rgba(0,0,0,.05);
+}
+
+/* ── RESET ──────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--ground);
+  color:var(--ink);
+  line-height:1.7;
+  min-height:100vh;
+  font-size:15px;
+}
+
+/* ── HERO ───────────────────────────────────────────────── */
+.hero{
+  background:linear-gradient(145deg,#1a0a3d 0%,#2d1b69 35%,#4338ca 70%,#6d28d9 100%);
+  padding:72px 24px 56px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+.hero::before{
+  content:'';
+  position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.15) 1px,transparent 1px);
+  background-size:28px 28px;
+  pointer-events:none;
+  z-index:0;
+}
+.hero::after{
+  content:'';
+  position:absolute;
+  bottom:-120px;right:-80px;
+  width:500px;height:500px;
+  border-radius:50%;
+  background:rgba(109,40,217,.25);
+  filter:blur(80px);
+  pointer-events:none;
+  z-index:0;
+}
+.hero > *{position:relative;z-index:1}
+.hero-eyebrow{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.7rem;
+  font-weight:700;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.55);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:99px;
+  padding:4px 16px;
+  margin-bottom:24px;
+}
+.hero h1{
+  font-size:clamp(2rem,5.5vw,3.25rem);
+  font-weight:900;
+  letter-spacing:-.035em;
+  color:#fff;
+  line-height:1.1;
+  margin-bottom:14px;
+}
+.hero-sub{
+  font-size:1rem;
+  color:rgba(255,255,255,.65);
+  max-width:560px;
+  margin:0 auto 32px;
+  font-weight:400;
+  line-height:1.65;
+}
+.chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.chip{
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.18);
+  color:rgba(255,255,255,.88);
+  padding:5px 16px;
+  border-radius:99px;
+  font-size:.75rem;
+  font-weight:600;
+  letter-spacing:.02em;
+  backdrop-filter:blur(8px);
+}
+
+/* ── PROGRESS STRIP ─────────────────────────────────────── */
+.progress-strip{
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  padding:14px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.ps-label{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.ps-bar{
+  width:200px;height:6px;
+  background:var(--border);
+  border-radius:99px;
+  overflow:hidden;
+}
+.ps-fill{
+  height:100%;
+  width:60%; /* 90/150 = 60% */
+  background:linear-gradient(90deg,#4338ca,#6d28d9);
+  border-radius:99px;
+  transition:width .4s ease;
+}
+.ps-count{font-size:.78rem;font-weight:600;color:var(--accent);font-family:'JetBrains Mono',monospace}
+
+/* ── LAYOUT ──────────────────────────────────────────────── */
+.container{
+  max-width:860px;
+  margin:0 auto;
+  padding:40px 20px 80px;
+}
+
+/* ── MODULE INTRO ────────────────────────────────────────── */
+.mod-intro{
+  background:var(--surface);
+  border-radius:var(--r);
+  padding:28px 32px;
+  margin-bottom:36px;
+  border-left:3px solid var(--accent);
+  box-shadow:var(--shadow-md);
+  display:flex;
+  gap:20px;
+  align-items:flex-start;
+}
+.mod-icon{
+  font-size:2rem;
+  flex-shrink:0;
+  margin-top:2px;
+  line-height:1;
+}
+.mod-intro-tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--accent);
+  background:var(--accent-lt);
+  padding:3px 10px;
+  border-radius:5px;
+  display:inline-block;
+  margin-bottom:10px;
+}
+.mod-intro p{color:var(--ink-2);font-size:.92rem;line-height:1.75}
+.mod-intro strong{color:var(--ink);font-weight:600}
+
+/* ── QUESTION CARD ───────────────────────────────────────── */
+.card{
+  background:var(--surface);
+  border-radius:var(--r);
+  margin-bottom:20px;
+  box-shadow:var(--shadow-md);
+  border:1px solid var(--border);
+  overflow:hidden;
+  transition:box-shadow .2s ease, transform .2s ease;
+}
+.card:hover{
+  box-shadow:var(--shadow-lg);
+  transform:translateY(-1px);
+}
+
+.card-bar{
+  height:3px;
+  background:linear-gradient(90deg,var(--accent),#7c3aed);
+}
+
+.card-body{padding:28px 32px 32px}
+
+/* ── QUESTION HEADER ─────────────────────────────────────── */
+.qh{
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  margin-bottom:22px;
+  position:relative;
+}
+.qh::before{
+  content:attr(data-n);
+  font-family:'JetBrains Mono',monospace;
+  font-size:7rem;
+  font-weight:900;
+  color:var(--accent);
+  opacity:.04;
+  position:absolute;
+  top:-24px;right:-8px;
+  line-height:1;
+  pointer-events:none;
+  user-select:none;
+  letter-spacing:-.05em;
+}
+.qn{
+  flex-shrink:0;
+  width:40px;height:40px;
+  border-radius:10px;
+  background:linear-gradient(135deg,#4338ca,#7c3aed);
+  color:#fff;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.72rem;
+  font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  margin-top:3px;
+  box-shadow:0 2px 8px rgba(67,56,202,.35);
+}
+.qt{
+  font-size:1.03rem;
+  font-weight:700;
+  color:var(--ink);
+  line-height:1.45;
+  flex:1;
+}
+
+/* ── DIVIDER ─────────────────────────────────────────────── */
+.div{border:none;border-top:1px solid var(--border);margin:18px 0}
+
+/* ── SECTION LABEL ───────────────────────────────────────── */
+.lbl{
+  font-size:.63rem;
+  font-weight:800;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ink-3);
+  margin-bottom:8px;
+}
+
+/* ── ANSWER ──────────────────────────────────────────────── */
+.ans{
+  color:var(--ink-2);
+  font-size:.92rem;
+  line-height:1.82;
+}
+.ans strong{color:var(--ink);font-weight:600}
+.ans code{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.79rem;
+  background:#eef0fd;
+  color:#3730a3;
+  padding:1px 6px;
+  border-radius:4px;
+  font-weight:500;
+}
+
+/* ── CODE BLOCK ──────────────────────────────────────────── */
+.code-wrap{margin-top:22px}
+.cb-header{
+  background:#1c2030;
+  border-radius:10px 10px 0 0;
+  padding:9px 16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.dots{display:flex;gap:5px;flex-shrink:0}
+.dot{width:11px;height:11px;border-radius:50%}
+.dr{background:#ff5f57}.dy{background:#febc2e}.dg{background:#28c840}
+.lang-badge{
+  margin-left:auto;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.63rem;
+  color:#5d7080;
+  font-weight:600;
+  letter-spacing:.06em;
+}
+pre{
+  background:var(--code-bg);
+  border-radius:0 0 10px 10px;
+  padding:20px 22px;
+  overflow-x:auto;
+  margin:0;
+}
+code.blk{
+  font-family:'JetBrains Mono','Fira Code','Courier New',monospace;
+  font-size:.79rem;
+  line-height:1.75;
+  color:var(--code-fg);
+  white-space:pre;
+  display:block;
+}
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+.footer{text-align:center;padding:48px 20px 60px}
+.footer-card{
+  display:inline-block;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px 40px;
+  box-shadow:var(--shadow-md);
+  max-width:440px;
+}
+.footer-card .done-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:#dcfce7;color:#15803d;
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 12px;border-radius:99px;
+  margin-bottom:12px;
+}
+.footer-card h3{font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:6px}
+.footer-card p{font-size:.88rem;color:var(--ink-2);line-height:1.6}
+.kbd{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.82rem;
+  font-weight:700;
+  background:var(--ground);
+  border:1px solid var(--border);
+  border-bottom:2px solid #c9cbe0;
+  border-radius:5px;
+  padding:1px 9px;
+  color:var(--ink);
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media(max-width:640px){
+  .hero{padding:52px 16px 44px}
+  .card-body{padding:22px 18px 24px}
+  .mod-intro{flex-direction:column;gap:12px;padding:20px 18px}
+  .qt{font-size:.95rem}
+  code.blk{font-size:.74rem}
+  .qh::before{font-size:5rem;top:-10px}
+  .code-wrap {
+  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  display: block;
+}
+
+pre {
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+  display: inline-block;
+  min-width: 100%;
+}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HERO ══════════════ -->
+<header class="hero">
+  <p class="hero-eyebrow">React Native Interview Prep · 2026 Edition</p>
+  <h1>Ecosystem &amp; Modern Libraries</h1>
+  <p class="hero-sub">Navigation: Expo Router &amp; React Navigation · State Management: Context, Zustand &amp; TanStack Query · Modern Styling: NativeWind, Tamagui &amp; Gluestack UI</p>
+  <div class="chips">
+    <span class="chip">🧭 Module 3 of 5</span>
+    <span class="chip">❓ Questions 61 – 90</span>
+    <span class="chip">🎯 Beginner Friendly</span>
+    <span class="chip">⚡ 2026 Standards</span>
+  </div>
+</header>
+
+<!-- ══════════════ PROGRESS ══════════════ -->
+<div class="progress-strip">
+  <span class="ps-label">Overall Progress</span>
+  <div class="ps-bar"><div class="ps-fill"></div></div>
+  <span class="ps-count">90 / 150</span>
+</div>
+
+<!-- ══════════════ CONTENT ══════════════ -->
+<div class="container">
+
+  <div class="mod-intro">
+    <div class="mod-icon">🧭</div>
+    <div>
+      <span class="mod-intro-tag">Module 3 · Ecosystem &amp; Modern Libraries [2026 Standards]</span>
+      <p>This module covers the <strong>libraries that surround the core React Native framework</strong> in a real, modern app. You'll learn how screens connect together (navigation), how data and app state flow around your components (state management), and how teams are styling apps in 2026 beyond plain <code>StyleSheet.create()</code>. Knowing this ecosystem signals to interviewers that you can work in a real production codebase, not just a tutorial app.</p>
+    </div>
+  </div>
+
+  <!-- ─── Q61 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="61">
+        <div class="qn">61</div>
+        <h2 class="qt">What is React Navigation and what problem does it solve?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">React Native has no built-in concept of "pages" or browser history like the web does. <strong>React Navigation</strong> is the most established library that fills this gap — it lets you define a set of screens and manages transitioning between them, maintaining a navigation history stack, and handling native back-gesture behavior on both iOS and Android. Think of it as the GPS and road system for your app: it doesn't build the destinations (your screens), but it knows how to get from one to another and remembers where you've been.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · Install</span>
+        </div>
+        <pre><code class="blk">npx expo install @react-navigation/native @react-navigation/native-stack
+npx expo install react-native-screens react-native-safe-area-context
+# Wrap your app root in &lt;NavigationContainer&gt; to get started</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q62 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="62">
+        <div class="qn">62</div>
+        <h2 class="qt">What is a Stack Navigator and how does it work?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>Stack Navigator</strong> organizes screens like a literal stack of cards — each new screen you navigate to is pushed on top, and going back pops the top card off, revealing the one underneath. It automatically provides the native slide-in transition and a back button/gesture, matching platform conventions (iOS slides from the right, Android can use a fade or slide depending on theme). It's the navigator pattern you'll use for the vast majority of "drill-down" flows, like tapping a list item to open a detail screen.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · createNativeStackNavigator</span>
+        </div>
+        <pre><code class="blk">import { createNativeStackNavigator } from '@react-navigation/native-stack';
+const Stack = createNativeStackNavigator();
+
+&lt;Stack.Navigator&gt;
+  &lt;Stack.Screen name="Home" component={HomeScreen} /&gt;
+  &lt;Stack.Screen name="Details" component={DetailsScreen} /&gt;
+&lt;/Stack.Navigator&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q63 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="63">
+        <div class="qn">63</div>
+        <h2 class="qt">What is a Tab Navigator (Bottom Tabs)?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>Bottom Tab Navigator</strong> renders a row of icons/labels fixed at the bottom of the screen — tapping one instantly switches to a different top-level section of the app, like Home, Search, and Profile. Unlike a Stack, tabs don't "push" on top of each other; they're siblings you jump between, and each tab typically keeps its own internal navigation state. Think of it as channel buttons on a TV remote — pressing a different button switches the whole picture instantly, and switching back returns you to whatever was last showing on that channel.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · createBottomTabNavigator</span>
+        </div>
+        <pre><code class="blk">import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+const Tab = createBottomTabNavigator();
+
+&lt;Tab.Navigator&gt;
+  &lt;Tab.Screen name="Home" component={HomeScreen} /&gt;
+  &lt;Tab.Screen name="Profile" component={ProfileScreen} /&gt;
+&lt;/Tab.Navigator&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q64 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="64">
+        <div class="qn">64</div>
+        <h2 class="qt">What is a Drawer Navigator?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>Drawer Navigator</strong> hides a vertical list of navigation links in a panel that slides in from the side — usually triggered by a hamburger icon or an edge swipe gesture. It's a common pattern for apps with many top-level sections that would crowd a bottom tab bar (e.g., Gmail's sidebar with Inbox, Starred, Sent, Trash). Think of it as a kitchen drawer you pull open to find a tool, then push closed again once you've picked your destination.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · createDrawerNavigator</span>
+        </div>
+        <pre><code class="blk">import { createDrawerNavigator } from '@react-navigation/drawer';
+const Drawer = createDrawerNavigator();
+
+&lt;Drawer.Navigator&gt;
+  &lt;Drawer.Screen name="Inbox" component={InboxScreen} /&gt;
+  &lt;Drawer.Screen name="Sent" component={SentScreen} /&gt;
+&lt;/Drawer.Navigator&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q65 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="65">
+        <div class="qn">65</div>
+        <h2 class="qt">How do you pass parameters between screens in React Navigation?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">You pass a second argument to <code>navigation.navigate()</code> containing any data you want to send — an object with whatever keys you like (e.g., an item's <code>id</code>). The destination screen reads it back through the <code>route.params</code> object, which every screen component automatically receives as a prop. It's like handing someone a sealed envelope as you point them toward a room — the envelope (params) travels with them and they open it (read route.params) once they arrive.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Passing & Reading Params</span>
+        </div>
+        <pre><code class="blk">// Sender screen
+navigation.navigate('Details', { itemId: 42, title: 'Cool Item' });
+
+// Receiver screen
+function DetailsScreen({ route }) {
+  const { itemId, title } = route.params;
+  return &lt;Text&gt;{title} (#{itemId})&lt;/Text&gt;;
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q66 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="66">
+        <div class="qn">66</div>
+        <h2 class="qt">What is the difference between navigate() and push()?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>navigate()</code> is "smart" — if the target screen already exists somewhere in the current stack, it jumps back to that existing instance instead of creating a duplicate. <code>push()</code> always adds a brand-new instance of the screen onto the stack, even if one already exists, which is useful for cases like a "related products" screen where you genuinely want a fresh copy each time (and a fresh back button per click). It's the difference between returning to a tab you already have open in a browser (navigate) versus always opening a new tab (push).</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · navigate vs push</span>
+        </div>
+        <pre><code class="blk">// Reuses an existing "Profile" screen in the stack if present
+navigation.navigate('Profile', { userId: 1 });
+
+// Always stacks a brand-new "Profile" screen instance
+navigation.push('Profile', { userId: 2 });</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q67 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="67">
+        <div class="qn">67</div>
+        <h2 class="qt">What is Expo Router and how is it different from React Navigation?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Expo Router</strong> is built on top of React Navigation, but replaces manually defining <code>&lt;Stack.Screen&gt;</code> components with <strong>file-based routing</strong> — similar to how Next.js works on the web. Instead of writing navigator config, you simply create files inside an <code>app/</code> directory, and each file automatically becomes a route. It's the difference between hand-drawing a map of every room in a building (React Navigation) versus the building itself being laid out so the floor plan IS the map (Expo Router) — less boilerplate, and it also enables deep linking and web URLs for free.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">File Tree · Expo Router</span>
+        </div>
+        <pre><code class="blk">app/
+├── _layout.tsx       ← root layout, wraps every screen
+├── index.tsx         ← matches route "/"
+├── settings.tsx      ← matches route "/settings"
+└── profile/[id].tsx  ← matches route "/profile/123"</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q68 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="68">
+        <div class="qn">68</div>
+        <h2 class="qt">How does file-based routing work in the Expo Router app directory?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Every file placed inside the <code>app/</code> directory automatically becomes a navigable route — its file path maps directly to a URL-like path. <code>app/index.tsx</code> is the home screen ("/"), <code>app/settings.tsx</code> becomes "/settings", and nested folders create nested paths (<code>app/profile/edit.tsx</code> → "/profile/edit"). There's no separate config file listing your routes — the file system itself <strong>is</strong> the navigation structure, similar to how a physical filing cabinet's folder structure tells you exactly where to find any document without needing a separate index.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">File Tree · Path Mapping</span>
+        </div>
+        <pre><code class="blk">app/index.tsx          →  "/"
+app/settings.tsx       →  "/settings"
+app/profile/edit.tsx   →  "/profile/edit"
+app/(tabs)/home.tsx    →  "/home"   (parens = layout group, hidden from URL)</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q69 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="69">
+        <div class="qn">69</div>
+        <h2 class="qt">What are dynamic routes in Expo Router, like [id].tsx?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Square brackets in a filename create a <strong>dynamic segment</strong> — a placeholder that matches any value at that position in the URL. A file named <code>[id].tsx</code> inside a <code>profile/</code> folder will match <code>/profile/1</code>, <code>/profile/abc</code>, or any other value, capturing whatever was typed as a parameter you can read inside the component. It's like a mail slot labeled "Apartment ___" — any apartment number fits, and once a letter arrives you can read exactly which number was written on it.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">TSX · app/profile/[id].tsx</span>
+        </div>
+        <pre><code class="blk">import { useLocalSearchParams } from 'expo-router';
+
+export default function ProfileScreen() {
+  const { id } = useLocalSearchParams();   // reads the matched segment
+  return &lt;Text&gt;Viewing profile #{id}&lt;/Text&gt;;
+}
+// Visiting /profile/42 renders this with id === "42"</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q70 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="70">
+        <div class="qn">70</div>
+        <h2 class="qt">What does a _layout.tsx file do in Expo Router?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <code>_layout.tsx</code> file defines <strong>shared UI or structure</strong> that wraps every route inside its folder — similar to a layout template that appears on every page. The root <code>app/_layout.tsx</code> commonly sets up global providers (theme, navigation stack type) that every screen needs. A <code>_layout.tsx</code> inside a subfolder can define a Tab Navigator or Stack Navigator that applies only to the screens in that folder. Think of it as the picture frame that stays constant while different photos (screens) get swapped in and out inside it.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">TSX · app/_layout.tsx</span>
+        </div>
+        <pre><code class="blk">import { Stack } from 'expo-router';
+
+export default function RootLayout() {
+  return (
+    &lt;Stack&gt;
+      &lt;Stack.Screen name="index" options={{ title: 'Home' }} /&gt;
+    &lt;/Stack&gt;
+  );
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q71 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="71">
+        <div class="qn">71</div>
+        <h2 class="qt">What is the Context API and when should you use it?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">React's built-in <strong>Context API</strong> lets you share a value across a whole tree of components without manually passing it down as a prop through every level. You create a Context, wrap your component tree in its <code>Provider</code> with a value, and any descendant can read that value with <code>useContext</code> — no matter how deeply nested. It's best for relatively stable, app-wide data like the current logged-in user, a theme, or a language setting — think of it as a building's central PA system, where any room can hear the announcement without someone walking it floor by floor.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Context API</span>
+        </div>
+        <pre><code class="blk">const ThemeContext = createContext('light');
+
+// Provide it once near the top
+&lt;ThemeContext.Provider value="dark"&gt;
+  &lt;App /&gt;
+&lt;/ThemeContext.Provider&gt;
+
+// Read it anywhere below, no prop drilling
+const theme = useContext(ThemeContext);</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q72 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="72">
+        <div class="qn">72</div>
+        <h2 class="qt">What is "prop drilling" and how does Context solve it?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Prop drilling</strong> is the tedious pattern of passing a piece of data down through several layers of components as props, even though only the deepest, final component actually needs it — every component in between must accept and forward it, cluttering their signatures. Context solves this by letting the deeply nested component pull the value directly, skipping all the intermediate "middlemen." It's like passing a note hand-to-hand through five people who don't need to read it (prop drilling) versus the final recipient just checking a shared bulletin board themselves (Context).</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Before & After</span>
+        </div>
+        <pre><code class="blk">// ❌ Prop drilling — user passed through 3 unrelated components
+&lt;Header user={user}&gt;&lt;Nav user={user}&gt;&lt;Avatar user={user} /&gt;&lt;/Nav&gt;&lt;/Header&gt;
+
+// ✅ Context — Avatar reads it directly, Header/Nav don't need to know
+const user = useContext(UserContext);</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q73 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="73">
+        <div class="qn">73</div>
+        <h2 class="qt">What are the downsides of Context API for frequently-changing state?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Every time a Context's value changes, <strong>every component</strong> consuming that Context re-renders — even ones that only use a tiny unrelated slice of the value, since Context doesn't support partial subscriptions out of the box. For state that updates often (like a scroll position, a typed search query, or live counters), this can cause unnecessary re-renders across large parts of your app. It's like a PA system announcing every tiny update — useful for rare important news, annoying and noisy if used for constant minute-by-minute chatter. This is exactly the gap libraries like Zustand fill.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Re-render Cost</span>
+        </div>
+        <pre><code class="blk">&lt;CounterContext.Provider value={count}&gt;
+  &lt;ComponentA /&gt;  {/* re-renders on every count change */}
+  &lt;ComponentB /&gt;  {/* re-renders too, even if it ignores count */}
+  &lt;ComponentC /&gt;  {/* re-renders too — no selective subscription */}
+&lt;/CounterContext.Provider&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q74 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="74">
+        <div class="qn">74</div>
+        <h2 class="qt">What is Zustand and how does it differ from the Context API?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Zustand</strong> is a small, popular state management library that creates a central "store" living outside the React component tree entirely. Components subscribe to only the specific slice of state they actually use via a selector function, so they only re-render when <em>that exact slice</em> changes — solving Context's "everyone re-renders" problem. There's also no <code>&lt;Provider&gt;</code> wrapper needed. Think of it as a shared whiteboard anyone can read from or write to directly, where each person only watches the one line that matters to them, rather than an announcement everyone must hear in full.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · Install</span>
+        </div>
+        <pre><code class="blk">npm install zustand
+# No Provider wrapper required — just import the store hook anywhere</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q75 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="75">
+        <div class="qn">75</div>
+        <h2 class="qt">How do you create and use a Zustand store?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">You call <code>create()</code> with a function that returns your initial state plus any update functions ("actions") that call <code>set()</code> to modify state. The result is a hook you import and call directly in any component — passing a selector function so the component only subscribes to the piece of state it needs. There's no boilerplate of reducers, action types, or dispatch — just plain functions reading and writing a shared object, which is why beginners often find it far simpler than Redux.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Zustand Store</span>
+        </div>
+        <pre><code class="blk">import { create } from 'zustand';
+
+const useCounterStore = create((set) =&gt; ({
+  count: 0,
+  increment: () =&gt; set((state) =&gt; ({ count: state.count + 1 })),
+}));
+
+// In any component — only re-renders when `count` changes
+const count = useCounterStore((state) =&gt; state.count);
+const increment = useCounterStore((state) =&gt; state.increment);</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q76 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="76">
+        <div class="qn">76</div>
+        <h2 class="qt">What is Redux, and why has it become less common for beginners in 2026?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Redux</strong> is an older, highly structured state management library built around a single global store, pure-function "reducers," and dispatched "actions" describing what happened. It's powerful for very large apps with complex state interactions and excellent debugging tools, but the ceremony of action types, action creators, and reducer boilerplate is a lot to learn upfront. For most apps in 2026, lighter alternatives like Zustand (for client state) combined with TanStack Query (for server/async data) cover the same needs with far less code — Redux is now reserved mostly for large existing codebases or teams that specifically need its strict patterns.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Boilerplate Comparison</span>
+        </div>
+        <pre><code class="blk">// Redux: action type + action creator + reducer case — just to add 1
+// Zustand: 
+const useStore = create((set) =&gt; ({
+  count: 0,
+  increment: () =&gt; set((s) =&gt; ({ count: s.count + 1 })),
+}));</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q77 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="77">
+        <div class="qn">77</div>
+        <h2 class="qt">What is TanStack Query (React Query) and what problem does it solve?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>TanStack Query</strong> is a library specialized in managing <strong>server/async state</strong> — data that lives on a backend and needs fetching, caching, and re-fetching. Instead of manually writing <code>useState</code> + <code>useEffect</code> + loading flags + error handling for every API call, you describe <em>what</em> data you need and TanStack Query handles caching, background refetching, retries, and deduplication automatically. Think of it as hiring a personal assistant for your data fetching — you ask for the latest report, and it figures out whether to grab a fresh copy or hand you the one it already has cached.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · Install</span>
+        </div>
+        <pre><code class="blk">npm install @tanstack/react-query
+# Wrap your app in &lt;QueryClientProvider client={queryClient}&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q78 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="78">
+        <div class="qn">78</div>
+        <h2 class="qt">What is the difference between useQuery and useMutation?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>useQuery</code> is for <strong>reading</strong> data — GET requests like fetching a list of posts — and runs automatically as soon as the component mounts, with built-in caching. <code>useMutation</code> is for <strong>writing</strong> data — POST/PUT/DELETE requests like submitting a form — and only runs when you explicitly call its <code>mutate()</code> function, since you don't want a "create user" request firing just because a component rendered. Think of <code>useQuery</code> as checking your mailbox automatically every time you walk by, and <code>useMutation</code> as deciding yourself when to drop a letter in the mailbox to send.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · useQuery vs useMutation</span>
+        </div>
+        <pre><code class="blk">// Reading — runs automatically
+const { data, isLoading } = useQuery({
+  queryKey: ['posts'],
+  queryFn: fetchPosts,
+});
+
+// Writing — runs only when called
+const { mutate } = useMutation({ mutationFn: createPost });
+mutate({ title: 'New Post' });</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q79 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="79">
+        <div class="qn">79</div>
+        <h2 class="qt">What is "stale-while-revalidate" caching in TanStack Query?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">When you re-visit a screen, TanStack Query <strong>immediately shows the data already cached</strong> from last time (even though it might be slightly outdated, or "stale") so the UI feels instant — then quietly fetches a fresh copy in the background and swaps it in once it arrives. The user never sees a blank loading spinner for data they've already seen recently. It's like glancing at yesterday's weather forecast pinned on the fridge while a fresh one downloads in the background — you get something useful instantly, then it gets corrected moments later if needed.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · staleTime Config</span>
+        </div>
+        <pre><code class="blk">useQuery({
+  queryKey: ['profile'],
+  queryFn: fetchProfile,
+  staleTime: 60 * 1000, // data considered "fresh" for 60s; no refetch needed
+});
+// After 60s, the cached data is shown instantly while a refetch happens silently</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q80 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="80">
+        <div class="qn">80</div>
+        <h2 class="qt">How does TanStack Query expose loading, error, and success states?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>useQuery</code> returns an object with boolean flags you can branch your UI on directly: <code>isLoading</code> (true only during the very first fetch with no cached data yet), <code>isError</code> (the request failed, with details in <code>error</code>), and <code>data</code> (populated once the fetch succeeds). There's also <code>isFetching</code>, which is true during <em>any</em> fetch including background refetches, even if cached data is already showing. This removes the need to manually track three separate <code>useState</code> flags yourself for every single API call.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Handling States</span>
+        </div>
+        <pre><code class="blk">const { data, isLoading, isError, error } = useQuery({
+  queryKey: ['todos'],
+  queryFn: fetchTodos,
+});
+
+if (isLoading) return &lt;ActivityIndicator /&gt;;
+if (isError) return &lt;Text&gt;Error: {error.message}&lt;/Text&gt;;
+return &lt;Text&gt;Loaded {data.length} todos&lt;/Text&gt;;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q81 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="81">
+        <div class="qn">81</div>
+        <h2 class="qt">What is NativeWind and how does it bring Tailwind to React Native?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>NativeWind</strong> lets you style React Native components using Tailwind CSS's familiar utility classes — directly in a <code>className</code> string — instead of writing <code>StyleSheet</code> objects. Behind the scenes, it compiles those class names down into the same native style objects React Native would normally need; nothing actually runs as "CSS" on the device. It's like writing shorthand notes that get fully expanded into formal sentences before anyone reads them — you write less, but the underlying mechanism is identical to standard RN styling.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · NativeWind className</span>
+        </div>
+        <pre><code class="blk">import { View, Text } from 'react-native';
+
+&lt;View className="flex-1 items-center justify-center bg-white"&gt;
+  &lt;Text className="text-xl font-bold text-indigo-600"&gt;Hello Tailwind!&lt;/Text&gt;
+&lt;/View&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q82 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="82">
+        <div class="qn">82</div>
+        <h2 class="qt">What is the practical difference between using NativeWind and plain StyleSheet.create()?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Functionally, they end up producing the same native style objects — NativeWind is essentially a build-time translator, not a new styling engine. The practical differences are developer experience: NativeWind classes are terser and colocated directly on the element (no separate style object to scroll to), and you get a consistent design scale (spacing, color shades) "for free" out of Tailwind's defaults. The trade-off is an extra build step and a learning curve if you don't already know Tailwind's utility-class naming conventions.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Same Output, Different Syntax</span>
+        </div>
+        <pre><code class="blk">// NativeWind
+&lt;View className="p-4 rounded-lg bg-indigo-600" /&gt;
+
+// Equivalent plain StyleSheet
+&lt;View style={{ padding: 16, borderRadius: 8, backgroundColor: '#4338ca' }} /&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q83 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="83">
+        <div class="qn">83</div>
+        <h2 class="qt">What is Tamagui, and what makes it different from a typical styling library?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Tamagui</strong> is a full UI kit and styling system that compiles your styles <strong>at build time</strong> (rather than at runtime) for better performance, and ships pre-built, themeable, accessible components (buttons, inputs, stacks) that work identically on iOS, Android, and Web from one codebase. Beyond just "styling," it provides an entire design-system layer — themes, responsive variants, and animation support baked in. Think of it less like a paint color (basic styling) and more like a fully-stocked architectural toolkit with pre-fabricated, customizable rooms ready to assemble.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Tamagui Stack & Button</span>
+        </div>
+        <pre><code class="blk">import { YStack, Button, Text } from 'tamagui';
+
+&lt;YStack space="$4" padding="$4" alignItems="center"&gt;
+  &lt;Text fontSize="$6"&gt;Welcome&lt;/Text&gt;
+  &lt;Button theme="active"&gt;Get Started&lt;/Button&gt;
+&lt;/YStack&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q84 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="84">
+        <div class="qn">84</div>
+        <h2 class="qt">What is Gluestack UI?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Gluestack UI</strong> is a cross-platform, accessible component library (buttons, modals, form inputs, and more) built on a "copy the code into your project" model similar in spirit to shadcn/ui on the web — rather than installing components as an opaque npm dependency, you own the actual component source files and can freely modify them. It's commonly paired with utility-style theming (often NativeWind/Tailwind-flavored) for visual customization. Think of it as buying unassembled furniture you can rearrange however you like, rather than a sealed pre-built cabinet you can only use as-is.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Gluestack Button</span>
+        </div>
+        <pre><code class="blk">import { Button, ButtonText } from '@/components/ui/button';
+
+&lt;Button size="md" variant="solid" action="primary"&gt;
+  &lt;ButtonText&gt;Continue&lt;/ButtonText&gt;
+&lt;/Button&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q85 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="85">
+        <div class="qn">85</div>
+        <h2 class="qt">What are "design tokens" in modern React Native styling libraries?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Design tokens</strong> are named, reusable values — like <code>$space.4</code> for spacing or <code>$color.primary</code> for a brand color — that stand in for raw numbers and hex codes throughout your app. Instead of typing <code>16</code> or <code>#4338ca</code> everywhere, you reference the token; changing the token's definition in one place updates every component using it instantly. It's exactly like a paint company's color names ("Midnight Indigo") — painters across a thousand houses all use the same can, so repainting the brand's signature color everywhere means mixing one new batch, not visiting every house individually.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Token Definition & Usage</span>
+        </div>
+        <pre><code class="blk">// Defined once in a theme/tokens file
+const tokens = { color: { primary: '#4338ca' }, space: { 4: 16 } };
+
+// Used everywhere via the library's token syntax
+&lt;View backgroundColor="$primary" padding="$4" /&gt;
+// Change the token once → updates every screen using it</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q86 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="86">
+        <div class="qn">86</div>
+        <h2 class="qt">What is a "universal" component library, and why does it matter for RN + Web?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>universal</strong> library (Tamagui and NativeWind both fit this label) ships components that render correctly on iOS, Android, <em>and</em> web from the exact same source code and the exact same import — no separate ".web.js" file or platform branching needed for basic styling. This matters because more 2026 teams are shipping a single React codebase to mobile <strong>and</strong> a marketing or admin website, and maintaining two separate design systems is expensive. It's like one universal power adapter that works in any country's outlet, rather than packing a different plug for every destination.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · One Codebase, 3 Platforms</span>
+        </div>
+        <pre><code class="blk">// Same import, same JSX — runs unmodified on iOS, Android, and Web
+import { Button } from 'tamagui';
+
+export default function CTA() {
+  return &lt;Button&gt;Sign Up&lt;/Button&gt;;
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q87 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="87">
+        <div class="qn">87</div>
+        <h2 class="qt">What's the difference between a "styled-components" approach and a utility-class approach in RN styling?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>styled-components-style</strong> approach defines a brand-new, named component with its styles baked in once (e.g., a <code>StyledButton</code>), which you then reuse everywhere as a single tag — styles live separately from markup. A <strong>utility-class</strong> approach (like NativeWind) applies many small, single-purpose classes directly inline on the existing element (<code>p-4 rounded-lg bg-blue-500</code>) — styles live right alongside the markup. It's the difference between ordering a pre-named combo meal once (styled-components) versus picking each individual item à la carte every time you order (utility classes).</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Two Approaches</span>
+        </div>
+        <pre><code class="blk">// Styled-components style — define once, reuse as a tag
+const StyledButton = styled(Pressable)\`padding: 16px; background: #4338ca;\`;
+&lt;StyledButton /&gt;
+
+// Utility-class style — composed inline, every time
+&lt;Pressable className="p-4 bg-indigo-700" /&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q88 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="88">
+        <div class="qn">88</div>
+        <h2 class="qt">How do modern styling libraries typically handle dark mode and theming?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Most modern libraries define two (or more) complete sets of token values — a "light" theme and a "dark" theme — that map the <em>same</em> token names (like <code>$background</code> or <code>$text</code>) to different actual colors. Switching themes is then just flipping a single active-theme flag; every component referencing tokens updates automatically without touching individual component code. Libraries typically also detect the device's system-level color scheme automatically via a hook. It's like a stage with colored gel filters over the lights — swap the filter, and every prop on stage instantly looks different, without anyone moving a single object.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Theme Switching</span>
+        </div>
+        <pre><code class="blk">import { useColorScheme } from 'react-native';
+
+const scheme = useColorScheme(); // 'light' | 'dark', from system settings
+
+&lt;TamaguiProvider defaultTheme={scheme}&gt;
+  &lt;App /&gt;
+&lt;/TamaguiProvider&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q89 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="89">
+        <div class="qn">89</div>
+        <h2 class="qt">What is the component composition / "slots" pattern used in libraries like Tamagui or Gluestack UI?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Instead of one giant component with dozens of props to configure every internal piece, these libraries break a UI element into several small sub-components you assemble yourself — like <code>Button</code>, <code>ButtonText</code>, and <code>ButtonIcon</code> nested together. Each "slot" handles one part, and you only include the slots you actually need. It's like a modular sofa system — you don't buy one fixed-shape couch, you snap together exactly the cushions and arms you want, in the arrangement that fits your room.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Composable Slots</span>
+        </div>
+        <pre><code class="blk">import { Button, ButtonText, ButtonIcon } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react-native';
+
+&lt;Button&gt;
+  &lt;ButtonText&gt;Next&lt;/ButtonText&gt;
+  &lt;ButtonIcon as={ArrowRight} /&gt;
+&lt;/Button&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q90 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="90">
+        <div class="qn">90</div>
+        <h2 class="qt">As a beginner in 2026, which styling approach should you start with, and why?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Start with plain <code>StyleSheet.create()</code> first — it forces you to actually understand Flexbox and React Native's style properties without any abstraction hiding what's happening underneath. Once that's solid, NativeWind is a natural next step if you already know (or want to learn) Tailwind's class-naming conventions, since it speeds up everyday styling significantly. Reach for Tamagui or Gluestack UI only once you're building a real multi-screen app and want consistent, pre-built, accessible components rather than building every button and input from scratch — they're powerful, but layering them on too early can hide the fundamentals you still need to learn.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Learning Path Guide</span>
+        </div>
+        <pre><code class="blk">1️⃣  StyleSheet.create()   → learn Flexbox & core RN style props first
+2️⃣  NativeWind             → faster utility-class styling once fundamentals are solid
+3️⃣  Tamagui / Gluestack UI → pre-built, themeable component systems for real apps</code></pre>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer class="footer">
+  <div class="footer-card">
+    <span class="done-badge">✅ Module 3 Complete</span>
+    <h3>Questions 61 – 90 Done!</h3>
+    <p>Type <span class="kbd">next</span> to receive <strong>Module 4</strong>:<br>Device Hardware: GPS &amp; Maps (Q91–120)</p>
+  </div>
+</footer>
+
+</body>
+</html>

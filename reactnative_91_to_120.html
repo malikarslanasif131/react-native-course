@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>React Native Prep · Module 4: Device Hardware — GPS &amp; Maps (Q91–120)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+/* ── TOKENS ─────────────────────────────────────────────── */
+:root{
+  --ink:        #0c0d14;
+  --ink-2:      #3c3d50;
+  --ink-3:      #7b7d96;
+  --surface:    #ffffff;
+  --ground:     #f3f4f9;
+  --border:     #e4e5f0;
+  --accent:     #4338ca;
+  --accent-lt:  #eef0fd;
+  --accent-glow:rgba(67,56,202,.12);
+  --code-bg:    #0d1117;
+  --code-fg:    #c9d1d9;
+  --code-str:   #a5d6ff;
+  --code-cmt:   #484f58;
+  --r:          14px;
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:  0 4px 16px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.05);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,.09), 0 2px 6px rgba(0,0,0,.05);
+}
+
+/* ── RESET ──────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--ground);
+  color:var(--ink);
+  line-height:1.7;
+  min-height:100vh;
+  font-size:15px;
+}
+
+/* ── HERO ───────────────────────────────────────────────── */
+.hero{
+  background:linear-gradient(145deg,#1a0a3d 0%,#2d1b69 35%,#4338ca 70%,#6d28d9 100%);
+  padding:72px 24px 56px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+.hero::before{
+  content:'';
+  position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.15) 1px,transparent 1px);
+  background-size:28px 28px;
+  pointer-events:none;
+  z-index:0;
+}
+.hero::after{
+  content:'';
+  position:absolute;
+  bottom:-120px;right:-80px;
+  width:500px;height:500px;
+  border-radius:50%;
+  background:rgba(109,40,217,.25);
+  filter:blur(80px);
+  pointer-events:none;
+  z-index:0;
+}
+.hero > *{position:relative;z-index:1}
+.hero-eyebrow{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.7rem;
+  font-weight:700;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.55);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:99px;
+  padding:4px 16px;
+  margin-bottom:24px;
+}
+.hero h1{
+  font-size:clamp(2rem,5.5vw,3.25rem);
+  font-weight:900;
+  letter-spacing:-.035em;
+  color:#fff;
+  line-height:1.1;
+  margin-bottom:14px;
+}
+.hero-sub{
+  font-size:1rem;
+  color:rgba(255,255,255,.65);
+  max-width:560px;
+  margin:0 auto 32px;
+  font-weight:400;
+  line-height:1.65;
+}
+.chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.chip{
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.18);
+  color:rgba(255,255,255,.88);
+  padding:5px 16px;
+  border-radius:99px;
+  font-size:.75rem;
+  font-weight:600;
+  letter-spacing:.02em;
+  backdrop-filter:blur(8px);
+}
+
+/* ── PROGRESS STRIP ─────────────────────────────────────── */
+.progress-strip{
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  padding:14px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.ps-label{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.ps-bar{
+  width:200px;height:6px;
+  background:var(--border);
+  border-radius:99px;
+  overflow:hidden;
+}
+.ps-fill{
+  height:100%;
+  width:80%; /* 120/150 = 80% */
+  background:linear-gradient(90deg,#4338ca,#6d28d9);
+  border-radius:99px;
+  transition:width .4s ease;
+}
+.ps-count{font-size:.78rem;font-weight:600;color:var(--accent);font-family:'JetBrains Mono',monospace}
+
+/* ── LAYOUT ──────────────────────────────────────────────── */
+.container{
+  max-width:860px;
+  margin:0 auto;
+  padding:40px 20px 80px;
+}
+
+/* ── MODULE INTRO ────────────────────────────────────────── */
+.mod-intro{
+  background:var(--surface);
+  border-radius:var(--r);
+  padding:28px 32px;
+  margin-bottom:36px;
+  border-left:3px solid var(--accent);
+  box-shadow:var(--shadow-md);
+  display:flex;
+  gap:20px;
+  align-items:flex-start;
+}
+.mod-icon{
+  font-size:2rem;
+  flex-shrink:0;
+  margin-top:2px;
+  line-height:1;
+}
+.mod-intro-tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--accent);
+  background:var(--accent-lt);
+  padding:3px 10px;
+  border-radius:5px;
+  display:inline-block;
+  margin-bottom:10px;
+}
+.mod-intro p{color:var(--ink-2);font-size:.92rem;line-height:1.75}
+.mod-intro strong{color:var(--ink);font-weight:600}
+
+/* ── QUESTION CARD ───────────────────────────────────────── */
+.card{
+  background:var(--surface);
+  border-radius:var(--r);
+  margin-bottom:20px;
+  box-shadow:var(--shadow-md);
+  border:1px solid var(--border);
+  overflow:hidden;
+  transition:box-shadow .2s ease, transform .2s ease;
+}
+.card:hover{
+  box-shadow:var(--shadow-lg);
+  transform:translateY(-1px);
+}
+
+.card-bar{
+  height:3px;
+  background:linear-gradient(90deg,var(--accent),#7c3aed);
+}
+
+.card-body{padding:28px 32px 32px}
+
+/* ── QUESTION HEADER ─────────────────────────────────────── */
+.qh{
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  margin-bottom:22px;
+  position:relative;
+}
+.qh::before{
+  content:attr(data-n);
+  font-family:'JetBrains Mono',monospace;
+  font-size:7rem;
+  font-weight:900;
+  color:var(--accent);
+  opacity:.04;
+  position:absolute;
+  top:-24px;right:-8px;
+  line-height:1;
+  pointer-events:none;
+  user-select:none;
+  letter-spacing:-.05em;
+}
+.qn{
+  flex-shrink:0;
+  width:40px;height:40px;
+  border-radius:10px;
+  background:linear-gradient(135deg,#4338ca,#7c3aed);
+  color:#fff;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.72rem;
+  font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  margin-top:3px;
+  box-shadow:0 2px 8px rgba(67,56,202,.35);
+}
+.qt{
+  font-size:1.03rem;
+  font-weight:700;
+  color:var(--ink);
+  line-height:1.45;
+  flex:1;
+}
+
+/* ── DIVIDER ─────────────────────────────────────────────── */
+.div{border:none;border-top:1px solid var(--border);margin:18px 0}
+
+/* ── SECTION LABEL ───────────────────────────────────────── */
+.lbl{
+  font-size:.63rem;
+  font-weight:800;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ink-3);
+  margin-bottom:8px;
+}
+
+/* ── ANSWER ──────────────────────────────────────────────── */
+.ans{
+  color:var(--ink-2);
+  font-size:.92rem;
+  line-height:1.82;
+}
+.ans strong{color:var(--ink);font-weight:600}
+.ans code{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.79rem;
+  background:#eef0fd;
+  color:#3730a3;
+  padding:1px 6px;
+  border-radius:4px;
+  font-weight:500;
+}
+
+/* ── CODE BLOCK ──────────────────────────────────────────── */
+.code-wrap{margin-top:22px}
+.cb-header{
+  background:#1c2030;
+  border-radius:10px 10px 0 0;
+  padding:9px 16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.dots{display:flex;gap:5px;flex-shrink:0}
+.dot{width:11px;height:11px;border-radius:50%}
+.dr{background:#ff5f57}.dy{background:#febc2e}.dg{background:#28c840}
+.lang-badge{
+  margin-left:auto;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.63rem;
+  color:#5d7080;
+  font-weight:600;
+  letter-spacing:.06em;
+}
+pre{
+  background:var(--code-bg);
+  border-radius:0 0 10px 10px;
+  padding:20px 22px;
+  overflow-x:auto;
+  margin:0;
+}
+code.blk{
+  font-family:'JetBrains Mono','Fira Code','Courier New',monospace;
+  font-size:.79rem;
+  line-height:1.75;
+  color:var(--code-fg);
+  white-space:pre;
+  display:block;
+}
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+.footer{text-align:center;padding:48px 20px 60px}
+.footer-card{
+  display:inline-block;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px 40px;
+  box-shadow:var(--shadow-md);
+  max-width:440px;
+}
+.footer-card .done-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:#dcfce7;color:#15803d;
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 12px;border-radius:99px;
+  margin-bottom:12px;
+}
+.footer-card h3{font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:6px}
+.footer-card p{font-size:.88rem;color:var(--ink-2);line-height:1.6}
+.kbd{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.82rem;
+  font-weight:700;
+  background:var(--ground);
+  border:1px solid var(--border);
+  border-bottom:2px solid #c9cbe0;
+  border-radius:5px;
+  padding:1px 9px;
+  color:var(--ink);
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media(max-width:640px){
+  .hero{padding:52px 16px 44px}
+  .card-body{padding:22px 18px 24px}
+  .mod-intro{flex-direction:column;gap:12px;padding:20px 18px}
+  .qt{font-size:.95rem}
+  code.blk{font-size:.74rem}
+  .qh::before{font-size:5rem;top:-10px}
+  .code-wrap {
+  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  display: block;
+}
+
+pre {
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+  display: inline-block;
+  min-width: 100%;
+}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HERO ══════════════ -->
+<header class="hero">
+  <p class="hero-eyebrow">React Native Interview Prep · 2026 Edition</p>
+  <h1>Device Hardware: GPS &amp; Maps</h1>
+  <p class="hero-sub">Runtime Permissions: Foreground vs. Background · Fetching Live Coordinates with expo-location · Rendering Maps, Markers &amp; Tracked Paths with react-native-maps</p>
+  <div class="chips">
+    <span class="chip">📍 Module 4 of 5</span>
+    <span class="chip">❓ Questions 91 – 120</span>
+    <span class="chip">🎯 Beginner Friendly</span>
+    <span class="chip">⚡ 2026 Standards</span>
+  </div>
+</header>
+
+<!-- ══════════════ PROGRESS ══════════════ -->
+<div class="progress-strip">
+  <span class="ps-label">Overall Progress</span>
+  <div class="ps-bar"><div class="ps-fill"></div></div>
+  <span class="ps-count">120 / 150</span>
+</div>
+
+<!-- ══════════════ CONTENT ══════════════ -->
+<div class="container">
+
+  <div class="mod-intro">
+    <div class="mod-icon">📍</div>
+    <div>
+      <span class="mod-intro-tag">Module 4 · Device Hardware: GPS &amp; Maps</span>
+      <p>This module covers how React Native apps tap into <strong>real device hardware</strong> — the user's physical location. You'll learn how runtime permissions work (and why they're stricter than ever on both platforms), how to fetch and continuously track coordinates with <code>expo-location</code>, and how to render an interactive map with custom markers and tracked paths using <code>react-native-maps</code>. Location features are a favorite interview topic because they touch permissions, async APIs, and native UI all at once.</p>
+    </div>
+  </div>
+
+  <!-- ─── Q91 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="91">
+        <div class="qn">91</div>
+        <h2 class="qt">Why do mobile apps need to request runtime permissions for location?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A user's GPS coordinates are extremely sensitive — they can reveal home address, daily routine, and real-time movements. Both iOS and Android enforce a <strong>runtime permission</strong> system: the operating system itself shows a native popup asking the user to explicitly allow or deny access, and your app code cannot read location data until that's granted. Think of it as a locked door inside the user's house — your app can knock and ask, but the OS (the homeowner) decides whether to let you in, every time, not just once at install.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Permission Flow</span>
+        </div>
+        <pre><code class="blk">App code calls: requestForegroundPermissionsAsync()
+        ↓
+OS shows native popup: "Allow [App] to access your location?"
+        ↓
+User taps Allow / Deny  →  result returned to your JS code</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q92 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="92">
+        <div class="qn">92</div>
+        <h2 class="qt">What is the difference between foreground and background location permission?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Foreground</strong> permission only allows location access while your app is actively open and visible on screen — the moment the user switches away or locks their phone, access stops. <strong>Background</strong> permission allows your app to keep reading location even when minimized or closed, useful for fitness trackers logging a run or delivery apps tracking a driver. Background access is a much bigger privacy ask, so both platforms require it to be requested as a clearly separate, additional step — like the difference between a guest allowed in your living room while you're home (foreground) versus given a house key to come and go anytime (background).</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · expo-location</span>
+        </div>
+        <pre><code class="blk">import * as Location from 'expo-location';
+
+// Foreground only — app must be open
+await Location.requestForegroundPermissionsAsync();
+
+// Background — needs foreground granted FIRST
+await Location.requestBackgroundPermissionsAsync();</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q93 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="93">
+        <div class="qn">93</div>
+        <h2 class="qt">How do you request foreground location permission using expo-location?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">You call <code>Location.requestForegroundPermissionsAsync()</code>, which is an async function that triggers the native OS permission dialog and resolves with a <code>status</code> field (either <code>'granted'</code> or <code>'denied'</code>). Best practice is to call this right before you actually need the location — not on app launch — and to check the returned status before attempting to fetch coordinates, since calling a location method without permission will throw an error.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Requesting Permission</span>
+        </div>
+        <pre><code class="blk">import * as Location from 'expo-location';
+
+async function askPermission() {
+  const { status } = await Location.requestForegroundPermissionsAsync();
+  if (status !== 'granted') {
+    console.log('Permission denied — cannot fetch location');
+    return false;
+  }
+  return true;
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q94 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="94">
+        <div class="qn">94</div>
+        <h2 class="qt">What is the difference between requestForegroundPermissionsAsync and requestBackgroundPermissionsAsync?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>requestForegroundPermissionsAsync</code> asks for the basic "while using the app" permission and is almost always called first. <code>requestBackgroundPermissionsAsync</code> asks for the elevated permission allowing tracking even when the app isn't on screen — but on both iOS and Android, you <strong>must</strong> have foreground permission already granted before background permission can even be requested; calling it first will simply fail or be ignored. Think of it as needing a basic visitor badge before you can apply for an after-hours building key — you can't skip straight to the higher-trust permission.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Correct Order</span>
+        </div>
+        <pre><code class="blk">const fg = await Location.requestForegroundPermissionsAsync();
+if (fg.status === 'granted') {
+  // Only NOW can background be requested
+  const bg = await Location.requestBackgroundPermissionsAsync();
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q95 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="95">
+        <div class="qn">95</div>
+        <h2 class="qt">What happens if a user denies a location permission request?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">The permission function resolves with <code>status: 'denied'</code> rather than throwing — your app keeps running normally, it just can't access location data. Calling a location-fetching function anyway (without checking status first) will typically throw a runtime error. Importantly, on most platforms, once denied, calling the request function <strong>again</strong> often won't re-show the native dialog — many OS versions silently deny repeat requests, requiring the user to manually re-enable the permission from system Settings instead. Good apps detect this and guide the user there with a clear explanation.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Handling Denial</span>
+        </div>
+        <pre><code class="blk">const { status, canAskAgain } = await Location.requestForegroundPermissionsAsync();
+
+if (status !== 'granted' && !canAskAgain) {
+  // Dialog won't show again — direct user to Settings manually
+  Alert.alert('Permission needed', 'Please enable location in Settings.');
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q96 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="96">
+        <div class="qn">96</div>
+        <h2 class="qt">How do you check the current permission status without prompting the user?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>Location.getForegroundPermissionsAsync()</code> (and its background equivalent) silently <strong>reads</strong> the current permission state without ever showing a dialog — useful for deciding what UI to show when a screen loads, before you commit to actually requesting anything. This is the "check" counterpart to the "ask" function — like quietly glancing at whether a door is already unlocked before deciding whether you need to knock at all.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Checking, Not Requesting</span>
+        </div>
+        <pre><code class="blk">const { status } = await Location.getForegroundPermissionsAsync();
+
+if (status === 'granted') {
+  // Already allowed — fetch location directly
+} else {
+  // Not yet granted — now show your own UI explaining why, then request
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q97 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="97">
+        <div class="qn">97</div>
+        <h2 class="qt">What is the difference between "When In Use" and "Always" location permission on iOS?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">These are iOS's specific names for foreground vs. background access. <strong>"When In Use"</strong> grants location only while the app is actively open on screen. <strong>"Always"</strong> additionally permits background tracking. Apple's permission dialog is notably strict: it often first offers only a one-time "Allow Once" or "While Using the App" choice, and only presents the "Always" upgrade option later, typically after the app has already requested foreground access and demonstrated a need — Apple deliberately makes the highest-trust option harder to obtain to protect user privacy.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · iOS Permission Tiers</span>
+        </div>
+        <pre><code class="blk">iOS dialog options typically shown to the user:
+  "Allow Once"             → one-time, foreground only
+  "Allow While Using App"  → foreground (== "When In Use")
+  "Always Allow"           → foreground + background (upgrade, asked later)</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q98 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="98">
+        <div class="qn">98</div>
+        <h2 class="qt">What configuration is needed in app.json to enable location permissions?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">In a Managed Expo project, you add the <code>expo-location</code> config plugin to <code>app.json</code>, including custom permission description strings that explain <strong>why</strong> your app needs location — these exact strings are what the user sees inside the native OS permission popup. iOS requires this description text or your app will be rejected from the App Store; Android handles most of this automatically but still benefits from a clear rationale. Skipping this step is a very common beginner mistake that causes permission requests to silently fail.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSON · app.json plugin config</span>
+        </div>
+        <pre><code class="blk">{
+  "expo": {
+    "plugins": [
+      ["expo-location", {
+        "locationAlwaysAndWhenInUsePermission":
+          "Allow $(PRODUCT_NAME) to use your location to show nearby stores."
+      }]
+    ]
+  }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q99 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="99">
+        <div class="qn">99</div>
+        <h2 class="qt">Why might background location require extra justification for app store approval?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Both Apple's App Store and Google Play treat background location as a high-risk privacy feature and require developers to clearly justify it during the review process — explaining exactly what user-facing feature needs it (e.g., live ride tracking, fitness route logging). Apps that request background access without an obvious matching feature are routinely rejected or removed. It's like a landlord requiring a written explanation before handing out a spare key — casual or vague reasons ("just in case") won't be accepted; the use case must be concrete and clearly tied to something the user directly benefits from.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Store Review Checklist</span>
+        </div>
+        <pre><code class="blk">✅ Acceptable justifications:
+   - Live navigation / turn-by-turn directions
+   - Fitness app tracking a run/ride in progress
+   - Delivery app tracking driver en route
+
+❌ Likely rejected:
+   - "Improve user experience" with no concrete feature shown</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q100 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="100">
+        <div class="qn">100</div>
+        <h2 class="qt">What is a good UX pattern for asking permissions: just-in-time vs. upfront?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Best practice is <strong>just-in-time</strong> requesting: ask for a permission only at the exact moment the user takes an action that needs it (e.g., tapping "Find stores near me"), not immediately when the app launches. Users are far more likely to grant a permission when they understand exactly why it's needed in context, versus a vague popup on a blank welcome screen. It's like a waiter asking "Can I take your coat?" right as you sit down (clear, contextual) versus a stranger demanding your coat the second you walk through the door (confusing, off-putting) — context dramatically improves the odds of a "yes."</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Just-In-Time Request</span>
+        </div>
+        <pre><code class="blk">// ❌ Bad — requesting on app launch, no context
+useEffect(() =&gt; { Location.requestForegroundPermissionsAsync(); }, []);
+
+// ✅ Good — requested only when the user taps a relevant button
+&lt;Pressable onPress={async () =&gt; {
+  await Location.requestForegroundPermissionsAsync();
+  findNearbyStores();
+}}&gt;
+  &lt;Text&gt;Find stores near me&lt;/Text&gt;
+&lt;/Pressable&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q101 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="101">
+        <div class="qn">101</div>
+        <h2 class="qt">What is expo-location and what does it provide?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>expo-location</code> is the official Expo SDK module that wraps the device's native GPS and location services into a simple JavaScript API. It handles permission requests, one-time coordinate fetches, continuous tracking, geocoding (address ↔ coordinates conversion), and more — without you ever touching native Swift/Kotlin code. Think of it as a translator standing between your JavaScript and the phone's actual GPS chip, converting your simple function calls into the right native instructions and handing results back in a clean, consistent format.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · Install</span>
+        </div>
+        <pre><code class="blk">npx expo install expo-location
+# Then import it in your component:
+import * as Location from 'expo-location';</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q102 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="102">
+        <div class="qn">102</div>
+        <h2 class="qt">How do you get the user's current location once with getCurrentPositionAsync?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>Location.getCurrentPositionAsync()</code> is an async function that takes a single GPS reading right now and resolves with the coordinates — perfect for a "show my current location" button that only needs one snapshot, not continuous tracking. You should always confirm permission is granted before calling it; otherwise it rejects with an error. It's like taking a single photograph of where you're standing right now, rather than recording a video that follows you as you move.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · One-Time Location Fetch</span>
+        </div>
+        <pre><code class="blk">const { status } = await Location.requestForegroundPermissionsAsync();
+if (status === 'granted') {
+  const location = await Location.getCurrentPositionAsync({});
+  console.log(location.coords.latitude, location.coords.longitude);
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q103 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="103">
+        <div class="qn">103</div>
+        <h2 class="qt">What does the Location object returned by expo-location actually contain?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">The resolved object has a <code>coords</code> property holding <code>latitude</code> and <code>longitude</code> (the core position), plus <code>altitude</code>, <code>accuracy</code> (the GPS reading's margin of error in meters), <code>heading</code> (compass direction of travel), and <code>speed</code> (movement speed in meters/second). There's also a top-level <code>timestamp</code> marking exactly when the reading was taken. The <code>accuracy</code> field is especially important to check — a reading with a 500-meter accuracy radius is far less trustworthy than one with 5 meters.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSON · Location Object Shape</span>
+        </div>
+        <pre><code class="blk">{
+  coords: {
+    latitude: 33.5651, longitude: 73.0169,
+    altitude: 487.2, accuracy: 8.5,
+    heading: 142.3,  speed: 0
+  },
+  timestamp: 1782460800000
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q104 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="104">
+        <div class="qn">104</div>
+        <h2 class="qt">What is the difference between getCurrentPositionAsync and watchPositionAsync?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>getCurrentPositionAsync</code> takes exactly one reading and resolves — done. <code>watchPositionAsync</code> sets up <strong>continuous</strong> tracking: you give it a callback function, and it keeps calling that callback with a fresh coordinate every time the device moves (or a time interval elapses), until you explicitly stop it. Use the first for a one-off "where am I now" button, and the second for live tracking — like the difference between checking your speedometer once versus watching it constantly update as you drive.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · One-Shot vs Continuous</span>
+        </div>
+        <pre><code class="blk">// One-time snapshot
+const loc = await Location.getCurrentPositionAsync({});
+
+// Continuous — callback fires repeatedly as the device moves
+const subscription = await Location.watchPositionAsync(
+  { accuracy: Location.Accuracy.High, distanceInterval: 10 },
+  (newLocation) =&gt; console.log(newLocation.coords)
+);</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q105 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="105">
+        <div class="qn">105</div>
+        <h2 class="qt">What does the "accuracy" option control when fetching location?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">The <code>accuracy</code> option tells the device <strong>how precise</strong> a reading you need, which directly trades off against battery usage and speed. <code>Location.Accuracy.Lowest</code> might use cell towers or Wi-Fi (fast, low battery cost, accurate to ~kilometers) while <code>Location.Accuracy.BestForNavigation</code> uses full GPS hardware continuously (slower to acquire, drains battery faster, accurate to a few meters). Choosing the right level is like deciding between a quick glance at a city map (low accuracy, low effort) versus carefully reading street-level GPS coordinates (high accuracy, more effort) — pick only as much precision as your feature actually needs.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Accuracy Levels</span>
+        </div>
+        <pre><code class="blk">await Location.getCurrentPositionAsync({
+  accuracy: Location.Accuracy.High, // good balance for most map features
+});
+// Other levels: Lowest, Low, Balanced, High, Highest, BestForNavigation</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q106 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="106">
+        <div class="qn">106</div>
+        <h2 class="qt">How do you continuously track a user's location with watchPositionAsync?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">You call <code>watchPositionAsync</code> with a configuration object (specifying accuracy and how often updates should fire, via <code>timeInterval</code> and/or <code>distanceInterval</code>) and a callback that receives each new location as it arrives. Typically you save each update into React state so your UI (like a map marker) re-renders to reflect the latest position. This is the foundation for any "live tracking" feature, like a runner's route or a delivery driver's progress on a map.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Live Tracking with State</span>
+        </div>
+        <pre><code class="blk">const [position, setPosition] = useState(null);
+
+useEffect(() =&gt; {
+  let sub;
+  (async () =&gt; {
+    sub = await Location.watchPositionAsync(
+      { accuracy: Location.Accuracy.High, distanceInterval: 5 },
+      (loc) =&gt; setPosition(loc.coords)
+    );
+  })();
+  return () =&gt; sub?.remove();   // cleanup on unmount
+}, []);</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q107 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="107">
+        <div class="qn">107</div>
+        <h2 class="qt">How do you stop watching location updates, and why is cleanup important?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>watchPositionAsync</code> returns a <strong>subscription object</strong> with a <code>.remove()</code> method — calling it stops the GPS watch entirely. This cleanup is critical: if you forget to call it when a screen unmounts (e.g., the user navigates away), the GPS hardware keeps running silently in the background, draining battery for no visible benefit — a very common, easy-to-miss bug. Always call <code>.remove()</code> inside a <code>useEffect</code> cleanup function, the same way you'd turn off a faucet after filling a glass instead of letting it run indefinitely.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Subscription Cleanup</span>
+        </div>
+        <pre><code class="blk">useEffect(() =&gt; {
+  let subscription;
+  Location.watchPositionAsync({}, (loc) =&gt; setPosition(loc.coords))
+    .then((sub) =&gt; { subscription = sub; });
+
+  return () =&gt; {
+    subscription?.remove(); // ✅ stops GPS watch — saves battery
+  };
+}, []);</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q108 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="108">
+        <div class="qn">108</div>
+        <h2 class="qt">What is geocoding and reverse geocoding in expo-location?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Geocoding</strong> converts a human-readable address into coordinates — "1600 Amphitheatre Parkway" becomes a latitude/longitude pair, via <code>Location.geocodeAsync()</code>. <strong>Reverse geocoding</strong> does the opposite: it takes coordinates and returns a readable address, via <code>Location.reverseGeocodeAsync()</code> — useful for showing "You are near Main Street" instead of raw numbers. Think of geocoding as looking up a street address in a phone book to find its map coordinates, and reverse geocoding as pointing at a spot on a map and asking "what's the address here?"</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Geocoding Both Ways</span>
+        </div>
+        <pre><code class="blk">// Address → coordinates
+const results = await Location.geocodeAsync('Times Square, New York');
+
+// Coordinates → address
+const address = await Location.reverseGeocodeAsync({
+  latitude: 40.7580, longitude: -73.9855,
+});
+console.log(address[0].city, address[0].street);</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q109 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="109">
+        <div class="qn">109</div>
+        <h2 class="qt">Why might location be slow or inaccurate indoors, and how does GPS differ from network-based location?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">True GPS relies on receiving signals from orbiting satellites, which requires a relatively clear line of sight to the sky — walls, roofs, and especially underground spaces block or weaken these signals, causing slow "time to first fix" or wildly inaccurate readings indoors. As a fallback, devices can use <strong>network-based location</strong> — triangulating position from nearby Wi-Fi networks and cell towers, which works indoors but is far less precise (tens to hundreds of meters, vs. GPS's few meters). It's the difference between using stars to navigate (GPS — precise outdoors, useless under a roof) versus recognizing nearby landmarks through a window (network-based — works anywhere, but blurrier).</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · GPS vs Network Location</span>
+        </div>
+        <pre><code class="blk">GPS (satellite)        → ~3-10m accuracy outdoors, poor indoors, slower fix
+Network (Wi-Fi/cell)   → ~50-500m accuracy, works indoors, fast fix
+// Most devices auto-blend both — that's what "Balanced" accuracy uses</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q110 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="110">
+        <div class="qn">110</div>
+        <h2 class="qt">How do you handle location errors gracefully, like GPS being turned off?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Always wrap location calls in a <code>try/catch</code> — if location services are disabled at the OS level (not just app permission, but the device's master location toggle), <code>getCurrentPositionAsync</code> rejects with an error rather than hanging forever. You can also proactively check with <code>Location.hasServicesEnabledAsync()</code> before attempting a fetch, and show the user a friendly message guiding them to turn on location services in their device settings, rather than letting the app appear frozen or silently fail.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · Graceful Error Handling</span>
+        </div>
+        <pre><code class="blk">const servicesOn = await Location.hasServicesEnabledAsync();
+if (!servicesOn) {
+  Alert.alert('Location Off', 'Please enable Location Services in Settings.');
+  return;
+}
+
+try {
+  const loc = await Location.getCurrentPositionAsync({});
+} catch (err) {
+  console.log('Could not fetch location:', err.message);
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q111 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="111">
+        <div class="qn">111</div>
+        <h2 class="qt">What is react-native-maps and what does it render under the hood?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>react-native-maps</code> is the standard library for embedding an interactive map inside a React Native screen. Rather than drawing its own map graphics, it wraps the device's <strong>native</strong> mapping engine — Apple Maps on iOS by default, and Google Maps on Android by default — giving you smooth, hardware-accelerated panning/zooming exactly like the platform's own Maps app, controlled entirely through React props and components.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Minimal MapView</span>
+        </div>
+        <pre><code class="blk">import MapView from 'react-native-maps';
+
+&lt;MapView
+  style={{ flex: 1 }}
+  initialRegion={{
+    latitude: 33.5651, longitude: 73.0169,
+    latitudeDelta: 0.05, longitudeDelta: 0.05,
+  }}
+/&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q112 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="112">
+        <div class="qn">112</div>
+        <h2 class="qt">What is the region prop on MapView, and what do latitudeDelta/longitudeDelta control?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">The <code>region</code> (or <code>initialRegion</code>) prop defines exactly what part of the world the map shows — its center point (<code>latitude</code>/<code>longitude</code>) and its zoom level, expressed as <code>latitudeDelta</code>/<code>longitudeDelta</code>: the span of the map visible in degrees. A smaller delta means a more zoomed-in view (showing a few city blocks), while a larger delta zooms out (showing an entire country). Think of the center coordinates as where you're pointing a camera, and the deltas as how wide-angle versus zoomed-in the lens is.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Zoom via Deltas</span>
+        </div>
+        <pre><code class="blk">// Zoomed in — neighborhood-level view
+{ latitude: 33.5651, longitude: 73.0169, latitudeDelta: 0.01, longitudeDelta: 0.01 }
+
+// Zoomed out — whole-city view
+{ latitude: 33.5651, longitude: 73.0169, latitudeDelta: 0.3,  longitudeDelta: 0.3  }</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q113 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="113">
+        <div class="qn">113</div>
+        <h2 class="qt">How do you add a basic marker to a map?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">You render a <code>&lt;Marker&gt;</code> component <strong>as a child</strong> of <code>&lt;MapView&gt;</code>, giving it a <code>coordinate</code> prop with the latitude/longitude where the pin should appear. You can render any number of markers, typically generated from an array of data (like store locations) using <code>.map()</code>. By default it renders the platform's standard pin-drop icon, with an optional <code>title</code> and <code>description</code> shown when tapped.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Basic Marker</span>
+        </div>
+        <pre><code class="blk">import MapView, { Marker } from 'react-native-maps';
+
+&lt;MapView style={{ flex: 1 }} initialRegion={region}&gt;
+  &lt;Marker
+    coordinate={{ latitude: 33.5651, longitude: 73.0169 }}
+    title="My Office"
+    description="Where I work every day"
+  /&gt;
+&lt;/MapView&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q114 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="114">
+        <div class="qn">114</div>
+        <h2 class="qt">How do you create a custom marker with your own icon or image?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Instead of relying on the default pin, you place <strong>any JSX</strong> as a child inside the <code>&lt;Marker&gt;</code> component — an <code>&lt;Image&gt;</code>, a styled <code>&lt;View&gt;</code>, even an emoji wrapped in <code>&lt;Text&gt;</code>. Whatever you render becomes the marker's visual appearance at that coordinate, completely replacing the default pin. It's like swapping a standard map pushpin for a custom-shaped sticker — the position logic stays the same, only the visual stamp changes.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Custom Marker Content</span>
+        </div>
+        <pre><code class="blk">&lt;Marker coordinate={{ latitude: 33.5651, longitude: 73.0169 }}&gt;
+  &lt;View style={{ backgroundColor: '#4338ca', padding: 6, borderRadius: 20 }}&gt;
+    &lt;Text style={{ fontSize: 18 }}&gt;🚗&lt;/Text&gt;
+  &lt;/View&gt;
+&lt;/Marker&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q115 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="115">
+        <div class="qn">115</div>
+        <h2 class="qt">What is a Callout, and how do you show extra info when tapping a marker?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <code>&lt;Callout&gt;</code> is a small popup bubble that appears above a marker when the user taps it, similar to the speech-bubble info window you see in Google Maps. You nest it inside a <code>&lt;Marker&gt;</code> and put any custom JSX inside it — text, images, even buttons — for richer information than the basic <code>title</code>/<code>description</code> props allow. Think of it as a tooltip specifically designed for map pins: tap the pin, a little info card pops up right above it.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Custom Callout</span>
+        </div>
+        <pre><code class="blk">import { Marker, Callout } from 'react-native-maps';
+
+&lt;Marker coordinate={coords}&gt;
+  &lt;Callout&gt;
+    &lt;View style={{ padding: 8 }}&gt;
+      &lt;Text style={{ fontWeight: 'bold' }}&gt;Coffee Shop&lt;/Text&gt;
+      &lt;Text&gt;Open until 9 PM&lt;/Text&gt;
+    &lt;/View&gt;
+  &lt;/Callout&gt;
+&lt;/Marker&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q116 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="116">
+        <div class="qn">116</div>
+        <h2 class="qt">How do you draw a path or route between coordinates using Polyline?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>&lt;Polyline&gt;</code> draws a connected line across an ordered array of coordinates — give it a <code>coordinates</code> array (each with a <code>latitude</code>/<code>longitude</code>), and it draws straight segments connecting them in sequence, with customizable color and thickness via <code>strokeColor</code> and <code>strokeWidth</code>. This is exactly how apps draw a traveled route or a navigation path — each GPS reading collected over time becomes one point in the array, and the Polyline visually "connects the dots" as a continuous trail.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Polyline Path</span>
+        </div>
+        <pre><code class="blk">import { Polyline } from 'react-native-maps';
+
+&lt;Polyline
+  coordinates={[
+    { latitude: 33.5651, longitude: 73.0169 },
+    { latitude: 33.5700, longitude: 73.0200 },
+    { latitude: 33.5740, longitude: 73.0250 },
+  ]}
+  strokeColor="#4338ca"
+  strokeWidth={4}
+/&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q117 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="117">
+        <div class="qn">117</div>
+        <h2 class="qt">How do you animate the map camera to a new region with animateToRegion?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">You call <code>.animateToRegion(region, duration)</code> on a <strong>ref</strong> attached to your <code>&lt;MapView&gt;</code> — this smoothly pans and zooms the camera to the new coordinates over the given duration in milliseconds, rather than jarringly snapping there instantly. It's commonly triggered by a "recenter on my location" button. Think of it as the difference between teleporting (jarring, disorienting) and a smooth camera pan in a movie (animateToRegion) — the gradual motion helps users keep their spatial bearings.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Camera Animation via Ref</span>
+        </div>
+        <pre><code class="blk">const mapRef = useRef(null);
+
+function recenter(coords) {
+  mapRef.current?.animateToRegion({
+    latitude: coords.latitude,
+    longitude: coords.longitude,
+    latitudeDelta: 0.02, longitudeDelta: 0.02,
+  }, 800); // animate over 800ms
+}
+
+&lt;MapView ref={mapRef} style={{ flex: 1 }} initialRegion={region} /&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q118 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="118">
+        <div class="qn">118</div>
+        <h2 class="qt">How do you track and visually update a user's live position on the map?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">You combine <code>watchPositionAsync</code> with React state and a <code>&lt;Marker&gt;</code>: every time the watch callback fires with a new coordinate, you update state, which re-renders the Marker at its new <code>coordinate</code> prop — React Native handles smoothly moving the pin (and optionally re-centers the camera via <code>animateToRegion</code>). It's exactly how a ride-sharing app shows a car icon gliding across the map in near real-time — the icon doesn't actually "move" continuously; it's just redrawn at a fresh position dozens of times per minute.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Live-Updating Marker</span>
+        </div>
+        <pre><code class="blk">const [position, setPosition] = useState(null);
+
+useEffect(() =&gt; {
+  const sub = Location.watchPositionAsync({ distanceInterval: 5 },
+    (loc) =&gt; setPosition(loc.coords));
+  return () =&gt; { sub.then(s =&gt; s.remove()); };
+}, []);
+
+&lt;MapView style={{ flex: 1 }} initialRegion={region}&gt;
+  {position &amp;&amp; &lt;Marker coordinate={position} /&gt;}
+&lt;/MapView&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q119 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="119">
+        <div class="qn">119</div>
+        <h2 class="qt">What is the difference between PROVIDER_GOOGLE and the default map provider?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">By default, <code>react-native-maps</code> uses each platform's native map engine — Apple Maps on iOS, Google Maps on Android. Passing <code>provider={PROVIDER_GOOGLE}</code> forces Google Maps to render on <strong>iOS too</strong>, giving a consistent look and feature set (like certain map styles or traffic layers) across both platforms instead of two visually different maps. The trade-off is needing a valid Google Maps API key configured for iOS, which Apple Maps doesn't require. It's like choosing to use the same brand of car on every road trip regardless of country, instead of renting whatever's locally standard.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Forcing Google Maps</span>
+        </div>
+        <pre><code class="blk">import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+
+&lt;MapView
+  provider={PROVIDER_GOOGLE}   // same engine on iOS AND Android
+  style={{ flex: 1 }}
+  initialRegion={region}
+/&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q120 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="120">
+        <div class="qn">120</div>
+        <h2 class="qt">What are common performance considerations when rendering many markers on a map?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Rendering hundreds or thousands of <code>&lt;Marker&gt;</code> components at once — especially custom JSX markers rather than the default pin — can seriously slow down panning and zooming, since each one is a real native view. Common fixes include: using simpler default markers instead of complex custom JSX where possible, only rendering markers currently within the visible region (filtering by the map's bounds), and <strong>clustering</strong> nearby markers into a single "12 nearby" bubble at lower zoom levels (via libraries like <code>react-native-map-clustering</code>). It's like a city street map only showing a single "Downtown" label when zoomed way out, instead of trying to render every individual shop sign at once.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Marker Performance Tactics</span>
+        </div>
+        <pre><code class="blk">✅ Use the default pin instead of heavy custom Marker JSX when possible
+✅ Filter markers to only those within the current visible region
+✅ Cluster nearby markers at low zoom (react-native-map-clustering)
+✅ Avoid re-rendering all markers on every minor region change (memoize)</code></pre>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer class="footer">
+  <div class="footer-card">
+    <span class="done-badge">✅ Module 4 Complete</span>
+    <h3>Questions 91 – 120 Done!</h3>
+    <p>Type <span class="kbd">next</span> to receive the final <strong>Module 5</strong>:<br>Push Notifications via Firebase Cloud Messaging (Q121–150)</p>
+  </div>
+</footer>
+
+</body>
+</html>

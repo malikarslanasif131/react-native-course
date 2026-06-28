@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>React Native Prep · Module 2: Core UI Components &amp; Performance (Q31–60)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+/* ── TOKENS ─────────────────────────────────────────────── */
+:root{
+  --ink:        #0c0d14;
+  --ink-2:      #3c3d50;
+  --ink-3:      #7b7d96;
+  --surface:    #ffffff;
+  --ground:     #f3f4f9;
+  --border:     #e4e5f0;
+  --accent:     #4338ca;   /* indigo */
+  --accent-lt:  #eef0fd;
+  --accent-glow:rgba(67,56,202,.12);
+  --code-bg:    #0d1117;
+  --code-fg:    #c9d1d9;
+  --code-str:   #a5d6ff;
+  --code-cmt:   #484f58;
+  --r:          14px;
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:  0 4px 16px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.05);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,.09), 0 2px 6px rgba(0,0,0,.05);
+}
+
+/* ── RESET ──────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--ground);
+  color:var(--ink);
+  line-height:1.7;
+  min-height:100vh;
+  font-size:15px;
+}
+
+/* ── HERO ───────────────────────────────────────────────── */
+.hero{
+  background:linear-gradient(145deg,#1a0a3d 0%,#2d1b69 35%,#4338ca 70%,#6d28d9 100%);
+  padding:72px 24px 56px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+.hero::before{
+  content:'';
+  position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.15) 1px,transparent 1px);
+  background-size:28px 28px;
+  pointer-events:none;
+  z-index:0;
+}
+.hero::after{
+  content:'';
+  position:absolute;
+  bottom:-120px;right:-80px;
+  width:500px;height:500px;
+  border-radius:50%;
+  background:rgba(109,40,217,.25);
+  filter:blur(80px);
+  pointer-events:none;
+  z-index:0;
+}
+.hero > *{position:relative;z-index:1}
+.hero-eyebrow{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.7rem;
+  font-weight:700;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.55);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:99px;
+  padding:4px 16px;
+  margin-bottom:24px;
+}
+.hero h1{
+  font-size:clamp(2rem,5.5vw,3.25rem);
+  font-weight:900;
+  letter-spacing:-.035em;
+  color:#fff;
+  line-height:1.1;
+  margin-bottom:14px;
+}
+.hero-sub{
+  font-size:1rem;
+  color:rgba(255,255,255,.65);
+  max-width:540px;
+  margin:0 auto 32px;
+  font-weight:400;
+  line-height:1.65;
+}
+.chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.chip{
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.18);
+  color:rgba(255,255,255,.88);
+  padding:5px 16px;
+  border-radius:99px;
+  font-size:.75rem;
+  font-weight:600;
+  letter-spacing:.02em;
+  backdrop-filter:blur(8px);
+}
+
+/* ── PROGRESS STRIP ─────────────────────────────────────── */
+.progress-strip{
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  padding:14px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.ps-label{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.ps-bar{
+  width:200px;height:6px;
+  background:var(--border);
+  border-radius:99px;
+  overflow:hidden;
+}
+.ps-fill{
+  height:100%;
+  width:40%; /* 60/150 = 40% */
+  background:linear-gradient(90deg,#4338ca,#6d28d9);
+  border-radius:99px;
+  transition:width .4s ease;
+}
+.ps-count{font-size:.78rem;font-weight:600;color:var(--accent);font-family:'JetBrains Mono',monospace}
+
+/* ── LAYOUT ──────────────────────────────────────────────── */
+.container{
+  max-width:860px;
+  margin:0 auto;
+  padding:40px 20px 80px;
+}
+
+/* ── MODULE INTRO ────────────────────────────────────────── */
+.mod-intro{
+  background:var(--surface);
+  border-radius:var(--r);
+  padding:28px 32px;
+  margin-bottom:36px;
+  border-left:3px solid var(--accent);
+  box-shadow:var(--shadow-md);
+  display:flex;
+  gap:20px;
+  align-items:flex-start;
+}
+.mod-icon{
+  font-size:2rem;
+  flex-shrink:0;
+  margin-top:2px;
+  line-height:1;
+}
+.mod-intro-tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--accent);
+  background:var(--accent-lt);
+  padding:3px 10px;
+  border-radius:5px;
+  display:inline-block;
+  margin-bottom:10px;
+}
+.mod-intro p{color:var(--ink-2);font-size:.92rem;line-height:1.75}
+.mod-intro strong{color:var(--ink);font-weight:600}
+
+/* ── QUESTION CARD ───────────────────────────────────────── */
+.card{
+  background:var(--surface);
+  border-radius:var(--r);
+  margin-bottom:20px;
+  box-shadow:var(--shadow-md);
+  border:1px solid var(--border);
+  overflow:hidden;
+  transition:box-shadow .2s ease, transform .2s ease;
+}
+.card:hover{
+  box-shadow:var(--shadow-lg);
+  transform:translateY(-1px);
+}
+
+.card-bar{
+  height:3px;
+  background:linear-gradient(90deg,var(--accent),#7c3aed);
+}
+
+.card-body{padding:28px 32px 32px}
+
+/* ── QUESTION HEADER ─────────────────────────────────────── */
+.qh{
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  margin-bottom:22px;
+  position:relative;
+}
+.qh::before{
+  content:attr(data-n);
+  font-family:'JetBrains Mono',monospace;
+  font-size:7rem;
+  font-weight:900;
+  color:var(--accent);
+  opacity:.04;
+  position:absolute;
+  top:-24px;right:-8px;
+  line-height:1;
+  pointer-events:none;
+  user-select:none;
+  letter-spacing:-.05em;
+}
+.qn{
+  flex-shrink:0;
+  width:40px;height:40px;
+  border-radius:10px;
+  background:linear-gradient(135deg,#4338ca,#7c3aed);
+  color:#fff;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.72rem;
+  font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  margin-top:3px;
+  box-shadow:0 2px 8px rgba(67,56,202,.35);
+}
+.qt{
+  font-size:1.03rem;
+  font-weight:700;
+  color:var(--ink);
+  line-height:1.45;
+  flex:1;
+}
+
+/* ── DIVIDER ─────────────────────────────────────────────── */
+.div{border:none;border-top:1px solid var(--border);margin:18px 0}
+
+/* ── SECTION LABEL ───────────────────────────────────────── */
+.lbl{
+  font-size:.63rem;
+  font-weight:800;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ink-3);
+  margin-bottom:8px;
+}
+
+/* ── ANSWER ──────────────────────────────────────────────── */
+.ans{
+  color:var(--ink-2);
+  font-size:.92rem;
+  line-height:1.82;
+}
+.ans strong{color:var(--ink);font-weight:600}
+.ans code{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.79rem;
+  background:#eef0fd;
+  color:#3730a3;
+  padding:1px 6px;
+  border-radius:4px;
+  font-weight:500;
+}
+
+/* ── CODE BLOCK ──────────────────────────────────────────── */
+.code-wrap{margin-top:22px}
+.cb-header{
+  background:#1c2030;
+  border-radius:10px 10px 0 0;
+  padding:9px 16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.dots{display:flex;gap:5px;flex-shrink:0}
+.dot{width:11px;height:11px;border-radius:50%}
+.dr{background:#ff5f57}.dy{background:#febc2e}.dg{background:#28c840}
+.lang-badge{
+  margin-left:auto;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.63rem;
+  color:#5d7080;
+  font-weight:600;
+  letter-spacing:.06em;
+}
+pre{
+  background:var(--code-bg);
+  border-radius:0 0 10px 10px;
+  padding:20px 22px;
+  overflow-x:auto;
+  margin:0;
+}
+code.blk{
+  font-family:'JetBrains Mono','Fira Code','Courier New',monospace;
+  font-size:.79rem;
+  line-height:1.75;
+  color:var(--code-fg);
+  white-space:pre;
+  display:block;
+}
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+.footer{text-align:center;padding:48px 20px 60px}
+.footer-card{
+  display:inline-block;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px 40px;
+  box-shadow:var(--shadow-md);
+  max-width:440px;
+}
+.footer-card .done-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:#dcfce7;color:#15803d;
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 12px;border-radius:99px;
+  margin-bottom:12px;
+}
+.footer-card h3{font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:6px}
+.footer-card p{font-size:.88rem;color:var(--ink-2);line-height:1.6}
+.kbd{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.82rem;
+  font-weight:700;
+  background:var(--ground);
+  border:1px solid var(--border);
+  border-bottom:2px solid #c9cbe0;
+  border-radius:5px;
+  padding:1px 9px;
+  color:var(--ink);
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media(max-width:640px){
+  .hero{padding:52px 16px 44px}
+  .card-body{padding:22px 18px 24px}
+  .mod-intro{flex-direction:column;gap:12px;padding:20px 18px}
+  .qt{font-size:.95rem}
+  code.blk{font-size:.74rem}
+  .qh::before{font-size:5rem;top:-10px}
+  .code-wrap {
+  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  display: block;
+}
+
+pre {
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+  display: inline-block;
+  min-width: 100%;
+}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HERO ══════════════ -->
+<header class="hero">
+  <p class="hero-eyebrow">React Native Interview Prep · 2026 Edition</p>
+  <h1>Core UI Components &amp; Performance</h1>
+  <p class="hero-sub">View, Text, Image, TextInput &amp; Pressable · ScrollView vs. FlatList &amp; Virtualization · Flexbox Styling Fundamentals</p>
+  <div class="chips">
+    <span class="chip">🧱 Module 2 of 5</span>
+    <span class="chip">❓ Questions 31 – 60</span>
+    <span class="chip">🎯 Beginner Friendly</span>
+    <span class="chip">⚡ 2026 Standards</span>
+  </div>
+</header>
+
+<!-- ══════════════ PROGRESS ══════════════ -->
+<div class="progress-strip">
+  <span class="ps-label">Overall Progress</span>
+  <div class="ps-bar"><div class="ps-fill"></div></div>
+  <span class="ps-count">60 / 150</span>
+</div>
+
+<!-- ══════════════ CONTENT ══════════════ -->
+<div class="container">
+
+  <div class="mod-intro">
+    <div class="mod-icon">🧱</div>
+    <div>
+      <span class="mod-intro-tag">Module 2 · Core UI Components &amp; Performance</span>
+      <p>This module covers the <strong>building blocks every screen is made of</strong>. You'll learn the five components you'll use constantly (View, Text, Image, TextInput, Pressable), the critical performance difference between ScrollView and FlatList for long lists, and how Flexbox — React Native's only layout system — actually works. Interviewers love asking "why FlatList over ScrollView?" — by the end of this module you'll be able to explain it with confidence.</p>
+    </div>
+  </div>
+
+  <!-- ─── Q31 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="31">
+        <div class="qn">31</div>
+        <h2 class="qt">What is the View component and how is it different from a &lt;div&gt;?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>View</strong> is the most basic building block in React Native — a rectangular container that supports layout (Flexbox), styling, and touch handling, much like a <code>&lt;div&gt;</code> on the web. The key difference is that <code>View</code> is <strong>not an HTML element</strong>; it compiles down to a real native <code>UIView</code> on iOS and an <code>android.view.View</code> on Android. There's no DOM, no CSS cascade, and no default margin/padding. Think of it as an empty box you can stack, nest, and style — but it only understands Flexbox layout, never floats or grids.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Basic View</span>
+        </div>
+        <pre><code class="blk">import { View } from 'react-native';
+
+export default function Box() {
+  return (
+    &lt;View style={{ width: 100, height: 100, backgroundColor: 'tomato' }} /&gt;
+  );
+}
+// Renders a real native UIView / android.view.View — not a &lt;div&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q32 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="32">
+        <div class="qn">32</div>
+        <h2 class="qt">What is the Text component, and why must all text be wrapped in it?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">In React Native, raw text <strong>cannot</strong> be placed inside a <code>View</code> directly — it must always be wrapped in a <code>&lt;Text&gt;</code> component, or the app crashes with an error. This is because <code>View</code> compiles to a native container that has no concept of rendering characters; only <code>Text</code> knows how to talk to the native text-rendering engine (like <code>UILabel</code> on iOS). Think of <code>View</code> as a picture frame and <code>Text</code> as the only kind of content allowed to go inside it when that content is words. Text styling (font, color, size) is also only inherited by nested <code>&lt;Text&gt;</code> elements, never by sibling Views.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Text Nesting</span>
+        </div>
+        <pre><code class="blk">// ❌ CRASHES: "Text strings must be rendered within a &lt;Text&gt; component"
+&lt;View&gt;Hello&lt;/View&gt;
+
+// ✅ Correct — and Text can nest inside Text to mix styles
+&lt;Text style={{ fontSize: 16 }}&gt;
+  Hello, &lt;Text style={{ fontWeight: 'bold' }}&gt;World!&lt;/Text&gt;
+&lt;/Text&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q33 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="33">
+        <div class="qn">33</div>
+        <h2 class="qt">What is the Image component, and how is it different from an HTML &lt;img&gt;?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>Image</code> renders pictures from local files, the network, or base64 data — but unlike HTML's <code>&lt;img&gt;</code>, it has <strong>no intrinsic size</strong>. If you don't explicitly set a <code>width</code> and <code>height</code> in its <code>style</code> prop, the image collapses to nothing visible. Think of an HTML image as a picture that brings its own frame; a React Native <code>Image</code> is a picture you must hang in a frame you build yourself. It also uses a <code>source</code> prop instead of <code>src</code>, and that prop's shape differs depending on whether the image is local or remote.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Image Basics</span>
+        </div>
+        <pre><code class="blk">import { Image } from 'react-native';
+
+&lt;Image
+  source={require('./logo.png')}     // local file
+  style={{ width: 120, height: 120 }} // ⚠️ required, or nothing shows!
+  resizeMode="contain"
+/&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q34 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="34">
+        <div class="qn">34</div>
+        <h2 class="qt">How do you load a local image vs. a remote image with the Image component?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">For a <strong>local image</strong> bundled inside your app, use <code>require()</code> with a relative file path — Metro statically analyzes this at build time and bundles the asset, so the path must be a string literal (no variables). For a <strong>remote image</strong>, pass an object with a <code>uri</code> key — and, importantly, you must also supply explicit dimensions, since React Native has no way to know a network image's size before it downloads. It's the difference between a photo already in your wallet (local) versus one you have to download from the internet first (remote).</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Local vs Remote</span>
+        </div>
+        <pre><code class="blk">// Local — Metro bundles this file at build time
+&lt;Image source={require('./assets/avatar.png')} style={{ width: 80, height: 80 }} /&gt;
+
+// Remote — must provide uri + dimensions
+&lt;Image
+  source={{ uri: 'https://example.com/photo.jpg' }}
+  style={{ width: 80, height: 80 }}
+/&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q35 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="35">
+        <div class="qn">35</div>
+        <h2 class="qt">What is the TextInput component and how do you read what the user types?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>TextInput</code> is React Native's equivalent of an HTML <code>&lt;input&gt;</code> — it renders the native on-screen keyboard and lets the user type text. Unlike the web, it doesn't fire a DOM "change" event with a target value; instead, you give it an <code>onChangeText</code> callback that receives the <strong>new string directly</strong> as its only argument. You almost always pair this with a piece of state so React re-renders the input with the latest typed value — this pattern is called a "controlled input," like keeping a live transcript of every keystroke.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Controlled TextInput</span>
+        </div>
+        <pre><code class="blk">import { useState } from 'react';
+import { TextInput } from 'react-native';
+
+const [name, setName] = useState('');
+
+&lt;TextInput
+  value={name}
+  onChangeText={setName}     // receives the string directly
+  placeholder="Enter your name"
+/&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q36 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="36">
+        <div class="qn">36</div>
+        <h2 class="qt">What is the difference between a controlled and an uncontrolled TextInput?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>controlled</strong> TextInput has its <code>value</code> prop tied to React state — every keystroke updates state, and state drives what's displayed, giving you full control (e.g., to validate or transform input live). An <strong>uncontrolled</strong> TextInput uses <code>defaultValue</code> instead — React sets the starting text once and then lets the native input manage its own value internally, only checked later via a ref. It's the difference between a teacher reading every word as a student writes it (controlled) versus collecting the finished essay only at the end (uncontrolled). Controlled is far more common in React Native apps.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Controlled vs Uncontrolled</span>
+        </div>
+        <pre><code class="blk">// Controlled — React state is the source of truth
+&lt;TextInput value={text} onChangeText={setText} /&gt;
+
+// Uncontrolled — native input manages itself; read via ref
+const inputRef = useRef(null);
+&lt;TextInput defaultValue="Hi there" ref={inputRef} /&gt;
+// later: inputRef.current?.clear()</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q37 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="37">
+        <div class="qn">37</div>
+        <h2 class="qt">Why does TextInput use onChangeText instead of onChange like the web?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">On the web, <code>onChange</code> hands you an event object and you dig out the new value via <code>event.target.value</code>. React Native skips that ceremony: <code>onChangeText</code> calls your function with the <strong>plain string</strong> directly — no event, no target, no digging required. There IS also an <code>onChange</code> prop in React Native, but it gives you a native event object (<code>event.nativeEvent.text</code>) and is rarely used since <code>onChangeText</code> is simpler. Think of <code>onChangeText</code> as someone handing you the note itself, versus <code>onChange</code> handing you an envelope you still have to open.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · onChangeText vs onChange</span>
+        </div>
+        <pre><code class="blk">// ✅ Preferred — gets the string directly
+&lt;TextInput onChangeText={(text) =&gt; console.log(text)} /&gt;
+
+// Also valid, but clunkier — must dig into nativeEvent
+&lt;TextInput onChange={(e) =&gt; console.log(e.nativeEvent.text)} /&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q38 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="38">
+        <div class="qn">38</div>
+        <h2 class="qt">What is Pressable and what makes it different from TouchableOpacity?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>Pressable</code> is the modern, recommended way to make anything tappable in React Native. Instead of a fixed visual effect, it gives you a <strong>function-as-style</strong> — your <code>style</code> prop can receive <code>{ pressed }</code> and decide exactly how the element should look while being held down. <code>TouchableOpacity</code>, the older component, only offers one built-in effect: fading opacity on press. Think of <code>Pressable</code> as a blank canvas with a "currently pressed?" flag you can react to any way you like, while <code>TouchableOpacity</code> is a pre-made effect you can only tweak slightly (its intensity).</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Pressable Style Function</span>
+        </div>
+        <pre><code class="blk">&lt;Pressable
+  onPress={() =&gt; console.log('Tapped!')}
+  style={({ pressed }) =&gt; ({
+    backgroundColor: pressed ? '#4338ca' : '#6d28d9',
+    padding: 14, borderRadius: 10,
+  })}&gt;
+  &lt;Text style={{ color: '#fff' }}&gt;Press Me&lt;/Text&gt;
+&lt;/Pressable&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q39 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="39">
+        <div class="qn">39</div>
+        <h2 class="qt">What is TouchableOpacity and when would you still reach for it?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>TouchableOpacity</code> wraps any element and automatically fades it to a lower opacity while pressed, then back to normal on release — giving a simple, familiar "button feel" with almost zero setup. Its <code>activeOpacity</code> prop controls how faded it gets (default <code>0.2</code>). You might still use it on an older codebase, in a quick prototype where you don't need custom press styling, or simply because it requires less code than writing a <code>Pressable</code> style function for a basic fade effect. For new projects, though, Meta now recommends <code>Pressable</code> as the long-term standard.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · TouchableOpacity</span>
+        </div>
+        <pre><code class="blk">import { TouchableOpacity, Text } from 'react-native';
+
+&lt;TouchableOpacity onPress={() =&gt; alert('Hi!')} activeOpacity={0.6}&gt;
+  &lt;Text&gt;Tap Me&lt;/Text&gt;
+&lt;/TouchableOpacity&gt;
+// Automatically fades to 60% opacity while held down</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q40 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="40">
+        <div class="qn">40</div>
+        <h2 class="qt">What were TouchableHighlight and TouchableWithoutFeedback used for?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">These are older "Touchable" components from before <code>Pressable</code> existed. <strong>TouchableHighlight</strong> darkens its background briefly on press — commonly used for list rows to confirm a tap registered, similar to a flashlight blink. <strong>TouchableWithoutFeedback</strong> detects presses but applies <strong>zero</strong> visual feedback — useful for things like dismissing a keyboard when tapping outside an input, where you want the tap logic without any visual change. Both are now considered legacy; <code>Pressable</code> can replicate either behavior and is the modern choice for all new code.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Legacy Touchables</span>
+        </div>
+        <pre><code class="blk">// Dismiss keyboard on outside tap — classic use case
+import { TouchableWithoutFeedback, Keyboard } from 'react-native';
+
+&lt;TouchableWithoutFeedback onPress={Keyboard.dismiss}&gt;
+  &lt;View style={{ flex: 1 }}&gt;{/* screen content */}&lt;/View&gt;
+&lt;/TouchableWithoutFeedback&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q41 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="41">
+        <div class="qn">41</div>
+        <h2 class="qt">What are onPressIn, onPressOut, and onLongPress on Pressable?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">These give you fine-grained control over the entire lifetime of a touch. <code>onPressIn</code> fires the instant a finger touches down — before release — useful for starting an animation immediately. <code>onPressOut</code> fires the moment the finger lifts (or drags away), regardless of whether it counted as a full "press." <code>onLongPress</code> fires only after the finger has stayed down past a duration threshold (default ~500ms), perfect for context menus or "hold to delete." Think of a stopwatch: <code>onPressIn</code> starts it, <code>onPressOut</code> stops it, and <code>onLongPress</code> rings an alarm if it ran long enough.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Full Press Lifecycle</span>
+        </div>
+        <pre><code class="blk">&lt;Pressable
+  onPressIn={() =&gt; console.log('Finger down')}
+  onPressOut={() =&gt; console.log('Finger lifted')}
+  onLongPress={() =&gt; console.log('Held for 500ms+')}
+  delayLongPress={500}&gt;
+  &lt;Text&gt;Hold me&lt;/Text&gt;
+&lt;/Pressable&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q42 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="42">
+        <div class="qn">42</div>
+        <h2 class="qt">How do you disable a Pressable or Button in React Native?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Pass the <code>disabled</code> prop with a boolean. When <code>true</code>, <code>Pressable</code> stops firing <code>onPress</code> and similar callbacks entirely — it's as if the element is sealed behind glass; taps simply don't register. Importantly, <code>disabled</code> doesn't change the visuals automatically, so you should also use the style function (or <code>disabled</code> inside it) to visually grey it out — otherwise users will tap a button that looks active but silently does nothing, which is a common beginner UX bug.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Disabled State</span>
+        </div>
+        <pre><code class="blk">const [loading, setLoading] = useState(false);
+
+&lt;Pressable
+  disabled={loading}
+  onPress={() =&gt; setLoading(true)}
+  style={{ opacity: loading ? 0.4 : 1, padding: 14 }}&gt;
+  &lt;Text&gt;{loading ? 'Submitting…' : 'Submit'}&lt;/Text&gt;
+&lt;/Pressable&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q43 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="43">
+        <div class="qn">43</div>
+        <h2 class="qt">What is ScrollView and when is it the right choice?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>ScrollView</code> renders <strong>all</strong> of its children at once and lets the user scroll through the resulting content if it overflows the screen. It's the right tool when you have a small, fixed, known set of items — a settings screen, a single profile page, a short form — where rendering everything up front costs nothing. The catch: because it renders everything immediately regardless of what's visible, using it for a list of hundreds or thousands of items will tank performance and memory usage. Think of ScrollView as unrolling an entire scroll of paper at once, even the parts you can't currently see.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · ScrollView</span>
+        </div>
+        <pre><code class="blk">import { ScrollView, Text } from 'react-native';
+
+&lt;ScrollView contentContainerStyle={{ padding: 20 }}&gt;
+  &lt;Text&gt;Profile info…&lt;/Text&gt;
+  &lt;Text&gt;Settings…&lt;/Text&gt;
+  &lt;Text&gt;About…&lt;/Text&gt;
+  {/* Fine for a handful of fixed sections */}
+&lt;/ScrollView&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q44 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="44">
+        <div class="qn">44</div>
+        <h2 class="qt">Why is FlatList preferred over ScrollView for long lists?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">FlatList only renders the items currently visible on screen (plus a small buffer), recycling the components as the user scrolls — a technique called <strong>virtualization</strong>. ScrollView, by contrast, mounts every single item immediately, no matter how many there are. For 10,000 items, ScrollView would create 10,000 real native views instantly — crashing or freezing on most devices — while FlatList might only ever have ~15 mounted at a time. It's the difference between printing an entire 500-page book at once (ScrollView) versus a Kindle that only renders the current page (FlatList).</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Basic FlatList</span>
+        </div>
+        <pre><code class="blk">import { FlatList, Text } from 'react-native';
+
+&lt;FlatList
+  data={users}                              // array of 1000s of items? No problem.
+  keyExtractor={(item) =&gt; item.id}
+  renderItem={({ item }) =&gt; &lt;Text&gt;{item.name}&lt;/Text&gt;}
+/&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q45 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="45">
+        <div class="qn">45</div>
+        <h2 class="qt">What exactly is "virtualization" in the context of FlatList?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Virtualization</strong> means only keeping a small "window" of items mounted in memory at any time — items far above or below the visible area are <strong>unmounted</strong> (or "clipped") and their memory reused for new items entering the viewport. As the user scrolls down, items that scroll off the top get destroyed, and new items appearing at the bottom get created using the recycled slots. It's exactly like a theater with 20 seats serving an audience of thousands — people who leave the front rows free up seats for people arriving at the back, so you never need 1000s of seats simultaneously.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual · Virtualization Window</span>
+        </div>
+        <pre><code class="blk">Data array:   [0,1,2,3,4,5,6,7,8, ... 9998, 9999]
+                          ▲
+                    visible window
+              only items ~near the screen are MOUNTED
+              everything else exists only as data, not as views ✅</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q46 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="46">
+        <div class="qn">46</div>
+        <h2 class="qt">What is keyExtractor in FlatList and why does it matter?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>keyExtractor</code> is a function that returns a unique, stable string ID for each item in your data — it's how FlatList (and React's reconciler underneath it) tracks which rendered row corresponds to which piece of data across re-renders and scrolling. Without a good key, React may reuse the wrong component for the wrong data, causing visual glitches like text flickering between items or input fields losing their content. Think of it as name tags at a conference — without them, the organizers (React) can't tell who's who when people shuffle around.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · keyExtractor</span>
+        </div>
+        <pre><code class="blk">&lt;FlatList
+  data={posts}
+  keyExtractor={(item) =&gt; item.id.toString()}  // ✅ stable, unique
+  // keyExtractor={(item, index) =&gt; index}      // ⚠️ avoid — breaks on reorder
+  renderItem={({ item }) =&gt; &lt;PostCard post={item} /&gt;}
+/&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q47 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="47">
+        <div class="qn">47</div>
+        <h2 class="qt">What is the renderItem prop and what does it receive?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>renderItem</code> is the function FlatList calls for every visible row to produce its JSX. It receives a single object containing <code>item</code> (the data for that row), <code>index</code> (its position in the array), and a few other metadata fields — you almost always destructure just <code>{ item }</code>. Think of it as a cookie-cutter: FlatList hands you one piece of raw dough (the data item) at a time, and your function stamps out the same shaped cookie (UI) every time, just filled with different data.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · renderItem Signature</span>
+        </div>
+        <pre><code class="blk">&lt;FlatList
+  data={products}
+  renderItem={({ item, index }) =&gt; (
+    &lt;Text&gt;{index + 1}. {item.title} — ${item.price}&lt;/Text&gt;
+  )}
+  keyExtractor={(item) =&gt; item.id}
+/&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q48 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="48">
+        <div class="qn">48</div>
+        <h2 class="qt">What do windowSize, initialNumToRender, and maxToRenderPerBatch control?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">These are FlatList's main performance dials. <code>initialNumToRender</code> sets how many items render immediately on first mount (so the screen isn't blank while waiting). <code>maxToRenderPerBatch</code> caps how many new items render per scroll-triggered batch, keeping each frame light. <code>windowSize</code> controls how large the virtualized "viewing window" is, measured in multiples of the visible screen length (default <code>21</code>, meaning ~10 screens above and below). Tuning these is like adjusting how many pages ahead a librarian pre-fetches for you — too few causes blank flashes while scrolling fast, too many wastes memory.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Tuning FlatList</span>
+        </div>
+        <pre><code class="blk">&lt;FlatList
+  data={feed}
+  initialNumToRender={10}     // first paint: 10 items, fast
+  maxToRenderPerBatch={5}     // 5 more per scroll batch
+  windowSize={11}             // smaller window = less memory
+  renderItem={renderItem}
+  keyExtractor={keyExtractor}
+/&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q49 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="49">
+        <div class="qn">49</div>
+        <h2 class="qt">What is getItemLayout and how does it boost FlatList performance?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>getItemLayout</code> lets you tell FlatList the exact <code>length</code> (height, for vertical lists) and <code>offset</code> of every item <strong>up front</strong>, instead of making FlatList measure each row after it renders. This only works when every item has a fixed, known size. With it, FlatList can instantly calculate scroll positions and jump to any index without ever rendering the items in between — like knowing every chapter in a book starts on an exact page number, so you can flip straight there instead of counting page by page.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · getItemLayout</span>
+        </div>
+        <pre><code class="blk">const ITEM_HEIGHT = 60;
+
+&lt;FlatList
+  data={contacts}
+  getItemLayout={(data, index) =&gt; ({
+    length: ITEM_HEIGHT,
+    offset: ITEM_HEIGHT * index,
+    index,
+  })}
+  renderItem={renderItem}
+/&gt;
+// Enables instant scrollToIndex() jumps with no measuring lag</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q50 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="50">
+        <div class="qn">50</div>
+        <h2 class="qt">What is the difference between FlatList and SectionList?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>FlatList</code> renders one flat array of items. <code>SectionList</code> renders <strong>grouped</strong> data — an array of sections, each with its own header and its own array of items — while keeping all the same virtualization performance benefits. It's the difference between a single shopping list (FlatList) and a contacts app grouped alphabetically under sticky letter headers "A," "B," "C" (SectionList). Use SectionList whenever your data naturally falls into categories that deserve a visible header.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · SectionList</span>
+        </div>
+        <pre><code class="blk">&lt;SectionList
+  sections={[
+    { title: 'A', data: ['Alice', 'Aaron'] },
+    { title: 'B', data: ['Bob'] },
+  ]}
+  keyExtractor={(item) =&gt; item}
+  renderItem={({ item }) =&gt; &lt;Text&gt;{item}&lt;/Text&gt;}
+  renderSectionHeader={({ section }) =&gt; &lt;Text&gt;{section.title}&lt;/Text&gt;}
+/&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q51 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="51">
+        <div class="qn">51</div>
+        <h2 class="qt">How do you implement pull-to-refresh in a FlatList?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">FlatList has two built-in props for this exact pattern: <code>refreshing</code> (a boolean that shows or hides the native spinner at the top) and <code>onRefresh</code> (a callback fired when the user pulls down past a threshold). You typically set <code>refreshing</code> to <code>true</code> the moment the user pulls, kick off a data re-fetch, then flip it back to <code>false</code> once new data arrives. It's the same gesture as refreshing your email inbox — pull down, see the spinner, wait, see the new messages.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Pull-to-Refresh</span>
+        </div>
+        <pre><code class="blk">const [refreshing, setRefreshing] = useState(false);
+
+const onRefresh = async () =&gt; {
+  setRefreshing(true);
+  await fetchLatestPosts();   // re-fetch your data
+  setRefreshing(false);
+};
+
+&lt;FlatList data={posts} refreshing={refreshing} onRefresh={onRefresh} renderItem={renderItem} /&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q52 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="52">
+        <div class="qn">52</div>
+        <h2 class="qt">How do you implement infinite scroll / pagination with onEndReached?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>onEndReached</code> fires automatically when the user scrolls near the bottom of the list — exactly where you'd load the "next page" of data. The companion prop <code>onEndReachedThreshold</code> (a value from 0 to 1) controls how close to the bottom triggers it — e.g., <code>0.5</code> fires when half a screen's worth of content remains. This is how apps like Instagram or Twitter feel "endless": each scroll near the bottom quietly fetches and appends more data, like a waiter who refills your plate the moment it's almost empty, before you even ask.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Infinite Scroll</span>
+        </div>
+        <pre><code class="blk">&lt;FlatList
+  data={feed}
+  renderItem={renderItem}
+  onEndReachedThreshold={0.5}        // fires with half-a-screen left
+  onEndReached={() =&gt; loadNextPage()}
+  ListFooterComponent={loading ? &lt;ActivityIndicator /&gt; : null}
+/&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q53 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="53">
+        <div class="qn">53</div>
+        <h2 class="qt">What are ListHeaderComponent, ListFooterComponent, and ItemSeparatorComponent?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">These props let you decorate a FlatList without manually injecting fake items into your data array. <code>ListHeaderComponent</code> renders once above all items (a banner, a title). <code>ListFooterComponent</code> renders once below all items (a loading spinner, "end of list" message). <code>ItemSeparatorComponent</code> renders a small element <strong>between</strong> every pair of items (a thin divider line) — but never before the first or after the last item. Think of them as the cover page, the closing page, and the dividers between chapters of a book.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · List Decorations</span>
+        </div>
+        <pre><code class="blk">&lt;FlatList
+  data={items}
+  renderItem={renderItem}
+  ListHeaderComponent={&lt;Text style={{fontSize:20}}&gt;My Feed&lt;/Text&gt;}
+  ItemSeparatorComponent={() =&gt; &lt;View style={{height:1, backgroundColor:'#eee'}} /&gt;}
+  ListFooterComponent={&lt;Text&gt;You've reached the end ✅&lt;/Text&gt;}
+/&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q54 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="54">
+        <div class="qn">54</div>
+        <h2 class="qt">What does removeClippedSubviews do, and when is it useful?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>removeClippedSubviews</code> tells the native rendering layer to fully detach views that have scrolled outside the visible viewport, rather than just hiding them. This frees up memory and improves scroll performance on Android in particular, where it gives the biggest gains for very long lists with many off-screen items. It's like literally removing furniture from a room once it's pushed out of view, instead of just turning off the lights on it — the room (memory) is genuinely emptier. It's enabled with a single boolean and works alongside FlatList's normal virtualization.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · removeClippedSubviews</span>
+        </div>
+        <pre><code class="blk">&lt;FlatList
+  data={hugeList}
+  renderItem={renderItem}
+  removeClippedSubviews={true}   // extra memory savings, mainly on Android
+/&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q55 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="55">
+        <div class="qn">55</div>
+        <h2 class="qt">What does flex: 1 actually do in React Native?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>flex: 1</code> tells a View to <strong>grow and fill all remaining available space</strong> along its parent's main axis, sharing that space proportionally with any sibling that also has a flex value. A single child with <code>flex: 1</code> inside a parent simply expands to fill the entire parent. Think of it like elastic dough: instead of a fixed size, you're saying "stretch to take up whatever room is left." It's the single most common style property in React Native — almost every root container uses <code>flex: 1</code> to fill the whole screen.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · flex: 1</span>
+        </div>
+        <pre><code class="blk">&lt;View style={{ flex: 1 }}&gt;          {/* fills the whole screen */}
+  &lt;View style={{ flex: 1, backgroundColor: 'tomato' }} /&gt;  {/* 50% */}
+  &lt;View style={{ flex: 1, backgroundColor: 'royalblue' }} /&gt; {/* 50% */}
+&lt;/View&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q56 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="56">
+        <div class="qn">56</div>
+        <h2 class="qt">What is the default flexDirection in React Native, and how does it differ from CSS on the web?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">This is one of the biggest beginner gotchas: in CSS Flexbox on the web, the default <code>flex-direction</code> is <code>row</code> (items line up left-to-right). In React Native, every <code>View</code> defaults to <code>flexDirection: 'column'</code> — items stack top-to-bottom unless you say otherwise. This makes sense for mobile screens, which are naturally tall and scroll vertically. If your layout looks unexpectedly "stacked" coming from web development, this default is almost always the reason — just add <code>flexDirection: 'row'</code> to fix it.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Column vs Row</span>
+        </div>
+        <pre><code class="blk">// Default — stacks vertically (column), unlike web's row default
+&lt;View&gt;
+  &lt;Text&gt;One&lt;/Text&gt;
+  &lt;Text&gt;Two&lt;/Text&gt;
+&lt;/View&gt;
+
+// Explicit row — now sits side-by-side, like web's default
+&lt;View style={{ flexDirection: 'row' }}&gt;
+  &lt;Text&gt;One&lt;/Text&gt;
+  &lt;Text&gt;Two&lt;/Text&gt;
+&lt;/View&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q57 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="57">
+        <div class="qn">57</div>
+        <h2 class="qt">What is the difference between justifyContent and alignItems?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>justifyContent</code> positions children along the <strong>main axis</strong> — the direction set by <code>flexDirection</code> (vertical for column, horizontal for row). <code>alignItems</code> positions children along the <strong>cross axis</strong> — perpendicular to the main axis. In a default column container, <code>justifyContent</code> controls vertical spacing (top/center/bottom/between) while <code>alignItems</code> controls horizontal alignment (left/center/right). Think of it as a bookshelf: <code>justifyContent</code> decides how books are spaced top-to-bottom on the shelf, while <code>alignItems</code> decides whether they're pushed to the front or back edge.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Main Axis vs Cross Axis</span>
+        </div>
+        <pre><code class="blk">&lt;View style={{
+  flex: 1,
+  justifyContent: 'center', // vertical centering (main axis, column)
+  alignItems: 'center',     // horizontal centering (cross axis)
+}}&gt;
+  &lt;Text&gt;Perfectly centered both ways&lt;/Text&gt;
+&lt;/View&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q58 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="58">
+        <div class="qn">58</div>
+        <h2 class="qt">What is alignSelf and how is it different from alignItems?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>alignItems</code> is set on a <strong>parent</strong> and applies a cross-axis alignment rule to <em>all</em> its children at once. <code>alignSelf</code> is set on an individual <strong>child</strong> and overrides whatever the parent's <code>alignItems</code> said, just for that one element. It's the difference between a teacher telling the whole class to sit on the left side of the room (alignItems) versus one particular student deciding to sit on the right instead, ignoring the general instruction (alignSelf).</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · alignSelf Override</span>
+        </div>
+        <pre><code class="blk">&lt;View style={{ alignItems: 'flex-start' }}&gt;
+  &lt;Text&gt;I'm aligned left (default)&lt;/Text&gt;
+  &lt;Text style={{ alignSelf: 'flex-end' }}&gt;
+    But I override it — I'm aligned right!
+  &lt;/Text&gt;
+&lt;/View&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q59 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="59">
+        <div class="qn">59</div>
+        <h2 class="qt">What's the difference between giving a View a fixed width/height vs. using flex?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>fixed</strong> size (e.g., <code>width: 100</code>) tells a View to always be exactly that many pixels, regardless of its parent's size — rigid, like a brick. A <strong>flex</strong> size (e.g., <code>flex: 1</code>) tells a View to be <strong>proportionally responsive</strong>, growing or shrinking based on available space and sibling flex values — elastic, like dough. Fixed sizing is predictable but breaks on different screen sizes; flex sizing adapts automatically, which is why most layouts mix both — fixed sizes for icons/avatars, flex for containers that should fill the screen.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Fixed vs Flexible</span>
+        </div>
+        <pre><code class="blk">&lt;View style={{ flexDirection: 'row', flex: 1 }}&gt;
+  &lt;Image source={icon} style={{ width: 40, height: 40 }} /&gt;  {/* fixed */}
+  &lt;View style={{ flex: 1, marginLeft: 12 }}&gt;                 {/* flexible */}
+    &lt;Text&gt;Fills all remaining row space&lt;/Text&gt;
+  &lt;/View&gt;
+&lt;/View&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q60 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="60">
+        <div class="qn">60</div>
+        <h2 class="qt">What is StyleSheet.create() and why use it instead of plain inline style objects?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>StyleSheet.create()</code> takes an object of named style definitions and returns an optimized version that React Native can reference by ID internally rather than re-creating a fresh object on every render. Functionally it behaves like a plain object, but it offers performance benefits (styles are validated once and can be sent over the bridge more efficiently) and, just as importantly, keeps your JSX clean by separating layout logic from style definitions — like keeping a recipe's ingredient list separate from the cooking steps, rather than scattering measurements throughout the instructions.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · StyleSheet.create</span>
+        </div>
+        <pre><code class="blk">import { StyleSheet, View, Text } from 'react-native';
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20 },
+  title:     { fontSize: 22, fontWeight: '700', color: '#0c0d14' },
+});
+
+&lt;View style={styles.container}&gt;
+  &lt;Text style={styles.title}&gt;Clean &amp; reusable styles&lt;/Text&gt;
+&lt;/View&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer class="footer">
+  <div class="footer-card">
+    <span class="done-badge">✅ Module 2 Complete</span>
+    <h3>Questions 31 – 60 Done!</h3>
+    <p>Type <span class="kbd">next</span> to receive <strong>Module 3</strong>:<br>Ecosystem &amp; Modern Libraries [2026 Standards] (Q61–90)</p>
+  </div>
+</footer>
+
+</body>
+</html>

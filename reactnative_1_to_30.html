@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>React Native Prep · Module 1: Architecture &amp; Setup (Q1–30)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+/* ── TOKENS ─────────────────────────────────────────────── */
+:root{
+  --ink:        #0c0d14;
+  --ink-2:      #3c3d50;
+  --ink-3:      #7b7d96;
+  --surface:    #ffffff;
+  --ground:     #f3f4f9;
+  --border:     #e4e5f0;
+  --accent:     #4338ca;   /* indigo */
+  --accent-lt:  #eef0fd;
+  --accent-glow:rgba(67,56,202,.12);
+  --code-bg:    #0d1117;
+  --code-fg:    #c9d1d9;
+  --code-str:   #a5d6ff;
+  --code-cmt:   #484f58;
+  --r:          14px;
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:  0 4px 16px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.05);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,.09), 0 2px 6px rgba(0,0,0,.05);
+}
+
+/* ── RESET ──────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--ground);
+  color:var(--ink);
+  line-height:1.7;
+  min-height:100vh;
+  font-size:15px;
+}
+
+/* ── HERO ───────────────────────────────────────────────── */
+.hero{
+  background:linear-gradient(145deg,#1a0a3d 0%,#2d1b69 35%,#4338ca 70%,#6d28d9 100%);
+  padding:72px 24px 56px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+/* dot-grid watermark — the page's signature texture */
+.hero::before{
+  content:'';
+  position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.15) 1px,transparent 1px);
+  background-size:28px 28px;
+  pointer-events:none;
+  z-index:0;
+}
+.hero::after{
+  content:'';
+  position:absolute;
+  bottom:-120px;right:-80px;
+  width:500px;height:500px;
+  border-radius:50%;
+  background:rgba(109,40,217,.25);
+  filter:blur(80px);
+  pointer-events:none;
+  z-index:0;
+}
+.hero > *{position:relative;z-index:1}
+.hero-eyebrow{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.7rem;
+  font-weight:700;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.55);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:99px;
+  padding:4px 16px;
+  margin-bottom:24px;
+}
+.hero h1{
+  font-size:clamp(2rem,5.5vw,3.25rem);
+  font-weight:900;
+  letter-spacing:-.035em;
+  color:#fff;
+  line-height:1.1;
+  margin-bottom:14px;
+}
+.hero-sub{
+  font-size:1rem;
+  color:rgba(255,255,255,.65);
+  max-width:540px;
+  margin:0 auto 32px;
+  font-weight:400;
+  line-height:1.65;
+}
+.chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.chip{
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.18);
+  color:rgba(255,255,255,.88);
+  padding:5px 16px;
+  border-radius:99px;
+  font-size:.75rem;
+  font-weight:600;
+  letter-spacing:.02em;
+  backdrop-filter:blur(8px);
+}
+
+/* ── PROGRESS STRIP ─────────────────────────────────────── */
+.progress-strip{
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  padding:14px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.ps-label{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.ps-bar{
+  width:200px;height:6px;
+  background:var(--border);
+  border-radius:99px;
+  overflow:hidden;
+}
+.ps-fill{
+  height:100%;
+  width:20%; /* 30/150 = 20% */
+  background:linear-gradient(90deg,#4338ca,#6d28d9);
+  border-radius:99px;
+  transition:width .4s ease;
+}
+.ps-count{font-size:.78rem;font-weight:600;color:var(--accent);font-family:'JetBrains Mono',monospace}
+
+/* ── LAYOUT ──────────────────────────────────────────────── */
+.container{
+  max-width:860px;
+  margin:0 auto;
+  padding:40px 20px 80px;
+}
+
+/* ── MODULE INTRO ────────────────────────────────────────── */
+.mod-intro{
+  background:var(--surface);
+  border-radius:var(--r);
+  padding:28px 32px;
+  margin-bottom:36px;
+  border-left:3px solid var(--accent);
+  box-shadow:var(--shadow-md);
+  display:flex;
+  gap:20px;
+  align-items:flex-start;
+}
+.mod-icon{
+  font-size:2rem;
+  flex-shrink:0;
+  margin-top:2px;
+  line-height:1;
+}
+.mod-intro-tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--accent);
+  background:var(--accent-lt);
+  padding:3px 10px;
+  border-radius:5px;
+  display:inline-block;
+  margin-bottom:10px;
+}
+.mod-intro p{color:var(--ink-2);font-size:.92rem;line-height:1.75}
+.mod-intro strong{color:var(--ink);font-weight:600}
+
+/* ── QUESTION CARD ───────────────────────────────────────── */
+.card{
+  background:var(--surface);
+  border-radius:var(--r);
+  margin-bottom:20px;
+  box-shadow:var(--shadow-md);
+  border:1px solid var(--border);
+  overflow:hidden;
+  transition:box-shadow .2s ease, transform .2s ease;
+}
+.card:hover{
+  box-shadow:var(--shadow-lg);
+  transform:translateY(-1px);
+}
+
+/* card top accent bar */
+.card-bar{
+  height:3px;
+  background:linear-gradient(90deg,var(--accent),#7c3aed);
+}
+
+.card-body{padding:28px 32px 32px}
+
+/* ── QUESTION HEADER ─────────────────────────────────────── */
+.qh{
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  margin-bottom:22px;
+  position:relative;
+}
+/* SIGNATURE ELEMENT: giant ghost number watermark */
+.qh::before{
+  content:attr(data-n);
+  font-family:'JetBrains Mono',monospace;
+  font-size:7rem;
+  font-weight:900;
+  color:var(--accent);
+  opacity:.04;
+  position:absolute;
+  top:-24px;right:-8px;
+  line-height:1;
+  pointer-events:none;
+  user-select:none;
+  letter-spacing:-.05em;
+}
+.qn{
+  flex-shrink:0;
+  width:40px;height:40px;
+  border-radius:10px;
+  background:linear-gradient(135deg,#4338ca,#7c3aed);
+  color:#fff;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.72rem;
+  font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  margin-top:3px;
+  box-shadow:0 2px 8px rgba(67,56,202,.35);
+}
+.qt{
+  font-size:1.03rem;
+  font-weight:700;
+  color:var(--ink);
+  line-height:1.45;
+  flex:1;
+}
+
+/* ── DIVIDER ─────────────────────────────────────────────── */
+.div{border:none;border-top:1px solid var(--border);margin:18px 0}
+
+/* ── SECTION LABEL ───────────────────────────────────────── */
+.lbl{
+  font-size:.63rem;
+  font-weight:800;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ink-3);
+  margin-bottom:8px;
+}
+
+/* ── ANSWER ──────────────────────────────────────────────── */
+.ans{
+  color:var(--ink-2);
+  font-size:.92rem;
+  line-height:1.82;
+}
+.ans strong{color:var(--ink);font-weight:600}
+.ans code{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.79rem;
+  background:#eef0fd;
+  color:#3730a3;
+  padding:1px 6px;
+  border-radius:4px;
+  font-weight:500;
+}
+
+/* ── CODE BLOCK ──────────────────────────────────────────── */
+.code-wrap{margin-top:22px}
+.cb-header{
+  background:#1c2030;
+  border-radius:10px 10px 0 0;
+  padding:9px 16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.dots{display:flex;gap:5px;flex-shrink:0}
+.dot{width:11px;height:11px;border-radius:50%}
+.dr{background:#ff5f57}.dy{background:#febc2e}.dg{background:#28c840}
+.lang-badge{
+  margin-left:auto;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.63rem;
+  color:#5d7080;
+  font-weight:600;
+  letter-spacing:.06em;
+}
+pre{
+  background:var(--code-bg);
+  border-radius:0 0 10px 10px;
+  padding:20px 22px;
+  overflow-x:auto;
+  margin:0;
+}
+code.blk{
+  font-family:'JetBrains Mono','Fira Code','Courier New',monospace;
+  font-size:.79rem;
+  line-height:1.75;
+  color:var(--code-fg);
+  white-space:pre;
+  display:block;
+}
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+.footer{text-align:center;padding:48px 20px 60px}
+.footer-card{
+  display:inline-block;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px 40px;
+  box-shadow:var(--shadow-md);
+  max-width:440px;
+}
+.footer-card .done-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:#dcfce7;color:#15803d;
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 12px;border-radius:99px;
+  margin-bottom:12px;
+}
+.footer-card h3{font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:6px}
+.footer-card p{font-size:.88rem;color:var(--ink-2);line-height:1.6}
+.kbd{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.82rem;
+  font-weight:700;
+  background:var(--ground);
+  border:1px solid var(--border);
+  border-bottom:2px solid #c9cbe0;
+  border-radius:5px;
+  padding:1px 9px;
+  color:var(--ink);
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media(max-width:640px){
+  .hero{padding:52px 16px 44px}
+  .card-body{padding:22px 18px 24px}
+  .mod-intro{flex-direction:column;gap:12px;padding:20px 18px}
+  .qt{font-size:.95rem}
+  code.blk{font-size:.74rem}
+  .qh::before{font-size:5rem;top:-10px}
+  .code-wrap {
+  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  display: block;
+}
+
+pre {
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+  display: inline-block;
+  min-width: 100%;
+}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HERO ══════════════ -->
+<header class="hero">
+  <p class="hero-eyebrow">React Native Interview Prep · 2026 Edition</p>
+  <h1>Architecture &amp; Setup</h1>
+  <p class="hero-sub">React Native CLI vs. Expo · Managed &amp; Bare Workflows · EAS Build, Submit &amp; Update · Project Configuration &amp; Build Processes</p>
+  <div class="chips">
+    <span class="chip">📦 Module 1 of 5</span>
+    <span class="chip">❓ Questions 1 – 30</span>
+    <span class="chip">🎯 Beginner Friendly</span>
+    <span class="chip">⚡ 2026 Standards</span>
+  </div>
+</header>
+
+<!-- ══════════════ PROGRESS ══════════════ -->
+<div class="progress-strip">
+  <span class="ps-label">Overall Progress</span>
+  <div class="ps-bar"><div class="ps-fill"></div></div>
+  <span class="ps-count">30 / 150</span>
+</div>
+
+<!-- ══════════════ CONTENT ══════════════ -->
+<div class="container">
+
+  <div class="mod-intro">
+    <div class="mod-icon">🏗️</div>
+    <div>
+      <span class="mod-intro-tag">Module 1 · Architecture &amp; Setup</span>
+      <p>This module covers the <strong>foundation of every React Native project</strong>. You'll learn how the framework communicates with native code, how to choose between Expo workflows, how EAS handles cloud builds and over-the-air updates, and how to read key configuration files. These are the first questions interviewers ask — nail them and you establish instant credibility.</p>
+    </div>
+  </div>
+
+  <!-- ─── Q1 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="01">
+        <div class="qn">01</div>
+        <h2 class="qt">What is React Native, and how is it different from a regular React web app?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">React Native is a framework by Meta that lets you build <strong>real native mobile apps</strong> for iOS and Android using JavaScript and React. In a regular React web app, your components compile down to HTML elements inside a browser. In React Native, those same components map to <strong>actual native UI widgets</strong> — a <code>&lt;View&gt;</code> becomes a real iOS <code>UIView</code> or Android <code>android.view.View</code>. There is no browser, no WebView, no HTML. You get genuine native rendering and performance from a single JavaScript codebase.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · App.jsx</span>
+        </div>
+        <pre><code class="blk">import { View, Text, StyleSheet } from 'react-native';
+
+// &lt;View&gt;  →  UIView (iOS) / android.view.View (Android)  — NOT a &lt;div&gt;!
+// &lt;Text&gt;  →  UILabel (iOS) / TextView (Android)           — NOT a &lt;p&gt;!
+export default function App() {
+  return (
+    &lt;View style={styles.container}&gt;
+      &lt;Text style={styles.heading}&gt;Hello, React Native!&lt;/Text&gt;
+    &lt;/View&gt;
+  );
+}
+const styles = StyleSheet.create({
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  heading:   { fontSize: 22, fontWeight: '700' },
+});</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q2 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="02">
+        <div class="qn">02</div>
+        <h2 class="qt">What is the difference between React Native CLI and Expo?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>React Native CLI</strong> is the official bare-bones tool from Meta. It gives you full access to native folders (<code>android/</code> and <code>ios/</code>) from day one, but requires Android Studio and Xcode installed locally to build anything. Think of it like building your own car from parts — total control, complex setup. <strong>Expo</strong> is a higher-level platform built on top of RN CLI. It provides a managed environment, pre-built libraries, cloud builds (EAS), and an instant preview app (Expo Go). Think of it as a ready-to-drive rental car. For beginners, Expo is almost always the right starting point.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · Terminal</span>
+        </div>
+        <pre><code class="blk"># ── Expo (recommended for beginners) ──────────────────────
+npx create-expo-app@latest MyApp
+cd MyApp
+npx expo start         # scan QR in Expo Go → runs instantly! 🎉
+
+# ── React Native CLI (full native control) ─────────────────
+npx @react-native-community/cli@latest init MyApp
+cd MyApp
+npx react-native run-android   # needs Android Studio + emulator</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q3 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="03">
+        <div class="qn">03</div>
+        <h2 class="qt">What is the Expo Managed Workflow?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">In the <strong>Managed Workflow</strong>, Expo hides the <code>android/</code> and <code>ios/</code> native folders entirely. You only write JavaScript; Expo handles all native code, configuration, and build settings behind the scenes. It's like renting a fully-managed apartment — you just move in and live. All app configuration (icons, name, permissions, splash screen) lives in a single <code>app.json</code> file. Perfect for most apps and all beginners — you get fast iteration without ever touching native code.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSON · app.json (Managed)</span>
+        </div>
+        <pre><code class="blk">{
+  "expo": {
+    "name":    "MyApp",
+    "slug":    "my-app",
+    "version": "1.0.0",
+    "icon":    "./assets/icon.png",
+    "splash":  { "image": "./assets/splash.png", "resizeMode": "contain" },
+    "ios":     { "bundleIdentifier": "com.yourname.myapp" },
+    "android": { "package": "com.yourname.myapp" }
+  }
+}
+// No android/ or ios/ folders — Expo manages them in the cloud ✅</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q4 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="04">
+        <div class="qn">04</div>
+        <h2 class="qt">What is the Expo Bare Workflow?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">The <strong>Bare Workflow</strong> is triggered by running <code>expo prebuild</code>. Expo generates the actual <code>android/</code> and <code>ios/</code> native project folders from your <code>app.json</code> configuration. You now own and can directly edit those folders — add native libraries, change Gradle settings, edit <code>Info.plist</code>, or write your own native modules. You still benefit from Expo's SDK and EAS services. Think of it as buying your apartment instead of renting — more control and flexibility, but you're now responsible for maintenance.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · Terminal</span>
+        </div>
+        <pre><code class="blk"># Option A: Start a new bare-workflow project from scratch
+npx create-expo-app --template bare-minimum MyBareApp
+
+# Option B: Migrate an existing Managed project to Bare
+cd MyApp
+npx expo prebuild         # generates android/ and ios/ from app.json
+npx expo prebuild --clean # re-generates (overwrites) native folders
+
+# You now have full android/ and ios/ folders to edit directly 🔧</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q5 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="05">
+        <div class="qn">05</div>
+        <h2 class="qt">As a beginner, when should you choose Managed Workflow, Bare Workflow, or React Native CLI?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Choose <strong>Managed Workflow</strong> for 90% of projects — it handles native complexity for you, supports all common device features through Expo's SDK, and gets you shipping fast. Choose <strong>Bare Workflow</strong> only when you need a native library that isn't available in Expo's SDK (e.g., a custom Bluetooth SDK), but still want to use EAS for cloud builds. Choose <strong>React Native CLI</strong> when you're joining an existing CLI codebase, or when your team needs the lowest-level native control. The guiding rule: <strong>start Managed, upgrade to Bare only when you hit a wall</strong>.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Decision Guide</span>
+        </div>
+        <pre><code class="blk">Managed Workflow  🟢  Best for: beginners, most production apps, fast builds
+                       You get: Expo Go preview, EAS cloud builds, no native code
+                       
+Bare Workflow     🟡  Best for: custom native libs + still want EAS services
+                       You get: android/ ios/ folders + full Expo SDK
+                       
+React Native CLI  🔴  Best for: legacy codebase, enterprise, zero Expo
+                       You get: maximum control, maximum setup complexity</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q6 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="06">
+        <div class="qn">06</div>
+        <h2 class="qt">What is the Metro Bundler and what role does it play?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Metro is React Native's <strong>JavaScript bundler</strong> — the tool that collects all your JS files, resolves imports, applies Babel transforms, and packages everything into a single optimized bundle your app can execute. Think of Metro as a logistics truck: it drives to every import in your project, picks up each file, and delivers one consolidated package to your device. During development Metro runs a local web server so your phone fetches the latest bundle over Wi-Fi on every change. In production the bundle is compiled and embedded inside the app binary.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · Terminal</span>
+        </div>
+        <pre><code class="blk"># Metro starts automatically with any of these commands:
+npx expo start                   # → Metro on exp://192.168.x.x:8081
+npx react-native start           # → Metro on http://localhost:8081
+
+# Metro's responsibilities:
+# 1. Resolve module imports (node_modules, aliases)
+# 2. Transform JSX + modern JS via Babel
+# 3. Bundle files into a single JS bundle
+# 4. Serve bundles over HTTP to the device / emulator
+# 5. Enable Hot Module Replacement (Fast Refresh)</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q7 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="07">
+        <div class="qn">07</div>
+        <h2 class="qt">What was the "Bridge" in the old React Native architecture, and why was it a bottleneck?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">In the original architecture, JavaScript and native code ran in completely separate threads and couldn't call each other directly. They communicated through a <strong>Bridge</strong> — an asynchronous messaging layer that <strong>serialized all data to JSON</strong> before passing it across, then deserialized it on the other side. Think of two offices passing notes through a slow mail room. Because every message (layout calculation, gesture event, animation frame) had to be JSON-encoded and decoded, high-frequency interactions like smooth animations could overwhelm the bridge and cause dropped frames. This is why the New Architecture was introduced.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Conceptual Diagram</span>
+        </div>
+        <pre><code class="blk">── OLD ARCHITECTURE (Bridge) ─────────────────────────────────
+  JS Thread  ──[serialize to JSON]──►  Bridge  ──[deserialize]──►  Native Thread
+             ◄──[serialize to JSON]──          ◄──[deserialize]──
+  Problem: asynchronous, high-volume messages cause congestion
+
+── NEW ARCHITECTURE (JSI + Fabric) ──────────────────────────
+  JS Thread  ◄──────────  JSI (C++ direct function refs)  ──────────►  Native
+  Benefit: synchronous calls possible, no JSON overhead, zero copy</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q8 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="08">
+        <div class="qn">08</div>
+        <h2 class="qt">What is the New Architecture in React Native — JSI, Fabric, and Turbo Modules?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">The <strong>New Architecture</strong> replaces the Bridge with three pillars. <strong>JSI (JavaScript Interface)</strong> is a lightweight C++ layer that lets JavaScript hold direct references to native objects and call native functions without JSON serialization — like giving JS and native code a shared phone line. <strong>Fabric</strong> is the new concurrent rendering engine for UI components. <strong>Turbo Modules</strong> are the new native module format — they load lazily (only when first accessed) instead of all at startup, dramatically improving launch time. This is enabled by default in React Native 0.76+ and Expo SDK 52+.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Config · Enabling New Arch</span>
+        </div>
+        <pre><code class="blk">// In Expo app.json (enabled by default in SDK 52+):
+{
+  "expo": {
+    "newArchEnabled": true
+  }
+}
+
+// In React Native CLI — android/gradle.properties:
+newArchEnabled=true
+
+// In React Native CLI — ios/Podfile:
+# New Architecture is ON by default in RN 0.76+
+# No extra config needed in new projects.</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q9 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="09">
+        <div class="qn">09</div>
+        <h2 class="qt">What is the Hermes JavaScript engine and why does React Native use it?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Hermes</strong> is a JavaScript engine built by Meta specifically for React Native. Traditional engines like V8 or JavaScriptCore compile your JS code Just-in-Time at runtime — like a chef cooking from scratch every service. Hermes takes a different approach: it <strong>pre-compiles JavaScript to bytecode at build time</strong>, so at startup the engine just executes the pre-prepared bytecode — like reheating a pre-cooked meal. The result is significantly <strong>faster app launch times</strong>, lower peak memory usage, and better battery performance. Hermes is the default engine in Expo SDK 48+ and React Native 0.70+.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSON · app.json</span>
+        </div>
+        <pre><code class="blk">// Hermes is the default in Expo SDK 48+ and RN 0.70+
+// You can explicitly set it in app.json:
+{
+  "expo": {
+    "jsEngine": "hermes"    // ✅ recommended (default)
+    // "jsEngine": "jsc"    // JavaScriptCore (legacy fallback)
+  }
+}
+
+// Hermes benefits vs. JSC:
+// ✅ ~50% faster Time-To-Interactive on cold start
+// ✅ Lower RAM usage (~30-40% in benchmarks)
+// ✅ Smaller binary size for JS payload</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q10 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="10">
+        <div class="qn">10</div>
+        <h2 class="qt">How do you create and run a brand-new Expo project from scratch?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">You need <strong>Node.js v18+</strong> installed, then use <code>create-expo-app</code> which scaffolds a complete project with all dependencies, a working <code>App.tsx</code>, and Expo configuration. Running <code>npx expo start</code> launches the Metro bundler and displays a QR code. Open the free <strong>Expo Go</strong> app on your physical Android or iOS device, scan the QR code, and your app appears on screen within seconds — no emulator, no native build required.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · Step-by-Step</span>
+        </div>
+        <pre><code class="blk"># Prerequisites: Node.js v18+ installed (https://nodejs.org)
+
+# Step 1 — scaffold the project
+npx create-expo-app@latest MyFirstApp
+
+# Step 2 — enter the directory
+cd MyFirstApp
+
+# Step 3 — start the dev server + Metro bundler
+npx expo start
+
+# Step 4 — on your phone:
+#   Android: Open Expo Go → Scan QR code
+#   iOS:     Open Camera  → Tap the Expo Go link
+# Your app is now live on your device! 📱</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q11 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="11">
+        <div class="qn">11</div>
+        <h2 class="qt">What is the difference between app.json and app.config.js in Expo?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>app.json</code> is a <strong>static JSON file</strong> with fixed, hardcoded values — simple and works perfectly for most single-environment apps. <code>app.config.js</code> is the <strong>dynamic alternative</strong> — a JavaScript file that exports a config object, so it can read <code>process.env</code> variables, execute logic, and return different settings for different environments (development, staging, production). As a beginner, <code>app.json</code> is perfectly fine. Graduate to <code>app.config.js</code> when you need multi-environment configuration.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · app.config.js</span>
+        </div>
+        <pre><code class="blk">// app.config.js — dynamic; can read env variables at build time
+export default ({ config }) =&gt; ({
+  ...config,                                  // spread existing app.json values
+  name:    process.env.APP_ENV === 'prod' ? 'MyApp' : 'MyApp [DEV]',
+  slug:    'my-app',
+  version: '2.1.0',
+  extra: {
+    apiUrl: process.env.API_BASE_URL ?? 'http://localhost:3000',
+  },
+});</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q12 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="12">
+        <div class="qn">12</div>
+        <h2 class="qt">What is EAS — Expo Application Services?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>EAS</strong> is Expo's cloud platform covering the full mobile app lifecycle. It consists of three main services: <strong>EAS Build</strong> (compile your app binary in the cloud), <strong>EAS Submit</strong> (publish to Google Play or Apple App Store), and <strong>EAS Update</strong> (push JavaScript-only updates to users without a store review). Think of EAS as your entire DevOps team hosted in the cloud — it eliminates the need for a Mac to build iOS apps, manages signing certificates automatically, and lets Windows and Linux developers ship to both platforms equally.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · EAS Setup</span>
+        </div>
+        <pre><code class="blk"># Install the EAS CLI
+npm install -g eas-cli
+
+# Login to your Expo account
+eas login
+
+# Initialize EAS in your project (creates eas.json)
+eas build:configure
+
+# The three EAS services:
+# eas build    → compile native binary (.apk / .ipa) in cloud ☁️
+# eas submit   → upload to Google Play Store / Apple App Store 🏪
+# eas update   → push JS-only OTA updates (no store review!) ⚡</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q13 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="13">
+        <div class="qn">13</div>
+        <h2 class="qt">What is EAS Build and why is it valuable?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>EAS Build</strong> compiles your React Native project in the cloud into a production-ready native binary — an <code>.apk</code> or <code>.aab</code> for Android, and an <code>.ipa</code> for iOS. The standout benefit: <strong>you don't need a Mac to build iOS apps</strong>. EAS's cloud servers have Xcode installed; you just push your code and receive a download link when the build finishes. EAS also handles signing certificates and provisioning profiles automatically. Think of sending your recipe to a professional kitchen — you provide ingredients, they produce the finished dish.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · EAS Build</span>
+        </div>
+        <pre><code class="blk"># Build Android APK for internal QA testing
+eas build --platform android --profile preview
+
+# Build iOS IPA for the App Store (needs Apple Dev account)
+eas build --platform ios --profile production
+
+# Build BOTH platforms simultaneously
+eas build --platform all --profile production
+
+# Check your queued / completed builds:
+eas build:list</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q14 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="14">
+        <div class="qn">14</div>
+        <h2 class="qt">What is EAS Submit?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>EAS Submit</strong> automates uploading your compiled app binary to the <strong>Google Play Store</strong> or <strong>Apple App Store Connect</strong>. Normally, submitting requires logging into web portals, filling in metadata, uploading your binary, and navigating complex dashboards. EAS Submit does all of this with a single terminal command. You can even chain it directly onto <code>eas build</code> so your app is built and submitted to the store in one unattended workflow — like having a shipping assistant who delivers straight to the store shelf.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · EAS Submit</span>
+        </div>
+        <pre><code class="blk"># Submit the most recent Android build to Google Play
+eas submit --platform android
+
+# Submit the most recent iOS build to App Store Connect
+eas submit --platform ios
+
+# Build AND auto-submit in one single command ✅
+eas build --platform android --profile production --auto-submit
+
+# Submit a specific build by ID:
+eas submit --platform ios --id &lt;build-id&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q15 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="15">
+        <div class="qn">15</div>
+        <h2 class="qt">What is EAS Update and what are Over-The-Air (OTA) updates?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>EAS Update</strong> lets you push changes to your app's JavaScript code and assets directly to users' phones, <strong>completely bypassing the app store review process</strong> (which can take days). When a user opens your app, it silently checks for a new JS bundle in the background and downloads it. This works because only your JavaScript layer changes — the native binary stays the same. OTA updates are ideal for fixing bugs or updating content instantly. <strong>Important limitation:</strong> you cannot change native code, SDK versions, or app permissions via OTA — those always require a full store release.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash + JSX</span>
+        </div>
+        <pre><code class="blk"># Publish an OTA update to the production channel
+eas update --branch production --message "Fix: cart total calculation"
+
+// Manually check for and apply updates in your app:
+import * as Updates from 'expo-updates';
+
+async function checkForUpdate() {
+  const { isAvailable } = await Updates.checkForUpdateAsync();
+  if (isAvailable) {
+    await Updates.fetchUpdateAsync();
+    await Updates.reloadAsync();  // restart app with new bundle
+  }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q16 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="16">
+        <div class="qn">16</div>
+        <h2 class="qt">What is a Development Build in Expo and when do you need one?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>Development Build</strong> is a custom version of Expo Go compiled specifically for your project. The standard Expo Go app contains a fixed set of pre-bundled native libraries. If your app uses a native package not in that set — like <code>react-native-ble-plx</code> for Bluetooth or a custom camera SDK — Expo Go will crash or error. A development build includes <em>your</em> custom native packages bundled together with Expo's developer tools. You install it once as an APK/IPA on your device, then iterate on JS changes instantly via Fast Refresh — the best of both worlds.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · Dev Build Workflow</span>
+        </div>
+        <pre><code class="blk"># Step 1: Build a development APK via EAS (includes your custom native libs)
+eas build --profile development --platform android
+
+# Step 2: Install the APK on your device or emulator
+#  (EAS gives you a download link and QR to install)
+
+# Step 3: Start the development server with --dev-client flag
+npx expo start --dev-client
+
+# Scan QR → your custom dev build opens (not the public Expo Go app)
+# JS changes still hot-reload instantly! ⚡</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q17 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="17">
+        <div class="qn">17</div>
+        <h2 class="qt">What is the Expo Go app?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Expo Go</strong> is a free app available on the iOS App Store and Google Play that acts as a <strong>universal viewer for Expo projects</strong>. You simply run <code>npx expo start</code>, scan the QR code with Expo Go on your phone, and your app launches on a real device within seconds — no compiling, no USB cable, no APK installation. It's the fastest possible way for beginners to see code running on real hardware. The trade-off: Expo Go only supports Expo's built-in library set. It cannot run custom native modules.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · Quick Start Flow</span>
+        </div>
+        <pre><code class="blk"># 1. Start your project
+npx expo start
+
+# 2. A QR code appears in the terminal (and at http://localhost:8081)
+
+# 3. Scan it with your phone:
+#    Android → Open the Expo Go app → tap "Scan QR code"
+#    iOS     → Open the native Camera app → tap the Expo Go link
+
+# ✅ Your app is now running live on your real device!
+# No build step, no emulator, no USB required.</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q18 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="18">
+        <div class="qn">18</div>
+        <h2 class="qt">What are the key limitations of Expo Go?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">Expo Go has a <strong>fixed, pre-bundled set of native libraries</strong>. If your project installs any native npm package not included in that set, Expo Go will throw an error or silently fail. Additionally: (1) you cannot use Expo Go for production or TestFlight distribution; (2) some permissions behave differently inside Expo Go versus a real standalone build; (3) you cannot test custom native modules. For any of these cases, the correct solution is to create a <strong>Development Build</strong>, which bundles your project's specific native dependencies.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Reference · What Works Where</span>
+        </div>
+        <pre><code class="blk">✅  Works in Expo Go:
+    expo-camera, expo-location, expo-sensors, expo-av
+    expo-notifications (with limited features)
+
+❌  Does NOT work in Expo Go:
+    react-native-ble-plx        (custom Bluetooth native module)
+    react-native-nfc-manager    (NFC hardware access)
+    Any custom Java/Swift native module you write yourself
+
+→  Solution for all of the above:
+   eas build --profile development --platform android</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q19 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="19">
+        <div class="qn">19</div>
+        <h2 class="qt">What can and cannot be changed via an OTA update?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">An OTA update replaces only the <strong>JavaScript bundle and static assets</strong> inside an already-installed app — it cannot modify the native binary. The rule of thumb: anything that Babel compiled from your <code>.js/.ts/.tsx</code> files can be updated OTA. Anything that required compiling native code (Java, Kotlin, Swift, Objective-C) requires a full new store release. This is why adding a new native npm package (e.g., a Bluetooth library) always requires a fresh EAS Build, not just an OTA update.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Reference Chart</span>
+        </div>
+        <pre><code class="blk">OTA Update ✅ CAN change:           OTA Update ❌ CANNOT change:
+  JavaScript logic &amp; components       Native modules (Java/Kotlin/Swift)
+  Screen layouts and styles           New npm packages with native code
+  Images, fonts, JSON data files      Permissions in AndroidManifest.xml
+  Bug fixes anywhere in JS layer      App icon / splash (native asset)
+  Config values in app.config.js      Expo SDK version upgrade
+  API endpoints, feature flags        React Native version upgrade</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q20 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="20">
+        <div class="qn">20</div>
+        <h2 class="qt">What are the android/ and ios/ folders in a React Native project?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">In React Native CLI and Expo Bare Workflow, your project contains real native project folders. <code>android/</code> is a full <strong>Gradle-based Android Studio project</strong> — you can open it in Android Studio, edit <code>AndroidManifest.xml</code>, add native dependencies in <code>build.gradle</code>, and write Java/Kotlin code. <code>ios/</code> is a full <strong>Xcode project</strong> — you open <code>.xcworkspace</code>, edit <code>Info.plist</code> for permissions, and run <code>pod install</code> for iOS native dependencies. In Expo Managed Workflow, these folders don't exist — Expo generates them internally during the cloud build process.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Project Tree · Bare / CLI</span>
+        </div>
+        <pre><code class="blk">MyApp/
+├── android/                             ← Full Android (Gradle) project
+│   └── app/
+│       ├── src/main/AndroidManifest.xml ← permissions, package name
+│       ├── src/main/java/...            ← Java/Kotlin native code
+│       └── google-services.json         ← Firebase config
+├── ios/                                 ← Full iOS (Xcode) project
+│   ├── MyApp.xcworkspace                ← open this in Xcode
+│   ├── MyApp/Info.plist                 ← iOS permissions
+│   └── Podfile                          ← CocoaPods dependencies
+├── app/                                 ← Your React Native JS source
+└── package.json</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q21 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="21">
+        <div class="qn">21</div>
+        <h2 class="qt">What is the purpose of package.json in a React Native project?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>package.json</code> is your project's <strong>identity card and dependency manifest</strong>. It tells Node.js the project name, version, which npm packages your app needs at runtime (<code>dependencies</code>), which packages are only needed during development (<code>devDependencies</code>), and which short-hand terminal commands you can run (<code>scripts</code>). When a teammate clones your repo and runs <code>npm install</code>, Node reads <code>package.json</code> and downloads every listed package. Without it, your project cannot be set up on a new machine.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSON · package.json</span>
+        </div>
+        <pre><code class="blk">{
+  "name": "my-app",
+  "version": "1.0.0",
+  "scripts": {
+    "start":   "expo start",
+    "android": "expo run:android",
+    "ios":     "expo run:ios",
+    "test":    "jest"
+  },
+  "dependencies": {
+    "expo": "~53.0.0",         // runtime — shipped with app
+    "react": "18.3.2",
+    "react-native": "0.76.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"   // dev-only — not in production bundle
+  }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q22 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="22">
+        <div class="qn">22</div>
+        <h2 class="qt">What is babel.config.js and what does it do?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Babel</strong> is a JavaScript compiler that transforms modern syntax — JSX, TypeScript, optional chaining (<code>?.</code>), nullish coalescing (<code>??</code>) — into JavaScript that older engines understand. <code>babel.config.js</code> tells Babel <em>which transformation rules (presets and plugins) to apply</em>. For Expo projects, the standard preset is <code>babel-preset-expo</code>, which handles all React Native-specific transforms. If you use Reanimated for animations, you must add its Babel plugin — and it <strong>must be the last entry</strong> in the plugins array.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · babel.config.js</span>
+        </div>
+        <pre><code class="blk">module.exports = function (api) {
+  api.cache(true);
+  return {
+    presets: ['babel-preset-expo'],  // handles JSX, TS, RN transforms
+    plugins: [
+      // Optional: add import path aliases
+      ['module-resolver', { alias: { '@': './src' } }],
+      // ⚠️ react-native-reanimated MUST be the LAST plugin:
+      'react-native-reanimated/plugin',
+    ],
+  };
+};</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q23 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="23">
+        <div class="qn">23</div>
+        <h2 class="qt">What is metro.config.js and when do you need to edit it?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>metro.config.js</code> configures the Metro bundler's behavior — which file extensions it recognizes, how it resolves modules, which transformers to use for special file types, and how monorepos are structured. For simple projects you <strong>never need to touch it</strong>. You would edit it when: (1) you want to import SVG files as React components (needs <code>react-native-svg-transformer</code>), (2) you have a monorepo with shared packages, or (3) you need custom module alias resolution at the bundler level rather than via Babel.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JS · metro.config.js</span>
+        </div>
+        <pre><code class="blk">const { getDefaultConfig } = require('expo/metro-config');
+
+const config = getDefaultConfig(__dirname);
+
+// Example: Enable SVG import as React components
+const { transformer, resolver } = config;
+config.transformer = {
+  ...transformer,
+  babelTransformerPath: require.resolve('react-native-svg-transformer'),
+};
+config.resolver = {
+  ...resolver,
+  assetExts:  resolver.assetExts.filter(ext =&gt; ext !== 'svg'),
+  sourceExts: [...resolver.sourceExts, 'svg'],
+};
+module.exports = config;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q24 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="24">
+        <div class="qn">24</div>
+        <h2 class="qt">What is the difference between a debug build and a release build?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>debug build</strong> is for development: it connects to the Metro dev server over your local network (so Fast Refresh works), includes the Red Box error overlay and DevTools inspector, and runs un-optimized JS. It is significantly slower than production. A <strong>release build</strong> is what ships to users: JavaScript is fully minified and bundled <em>into</em> the native binary, Hermes pre-compiles it to bytecode, the Metro connection is severed, and all developer tooling is stripped out. Release builds are noticeably faster and must be used for any performance testing.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · Build Variants</span>
+        </div>
+        <pre><code class="blk"># ── DEBUG (development) ───────────────────────────────────
+npx expo run:android              # debug by default
+npx react-native run-android      # debug by default
+eas build --profile development   # EAS debug build
+
+# ── RELEASE (production) ──────────────────────────────────
+npx expo run:android --variant release
+npx react-native run-android --mode release
+eas build --profile production    # EAS release build → store-ready binary</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q25 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="25">
+        <div class="qn">25</div>
+        <h2 class="qt">What is Fast Refresh in React Native?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Fast Refresh</strong> (introduced in React Native v0.61) is the development feature that <strong>instantly updates your app when you save a file</strong>, without losing component state. Unlike the old "Live Reload" (which restarted the entire app), Fast Refresh surgically re-renders only the components affected by your change. Change a style color and save — you see it update in under a second, with your text inputs, navigation position, and useState values intact. It works out of the box in both Expo and React Native CLI development mode.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Demo</span>
+        </div>
+        <pre><code class="blk">// Change 'royalblue' → 'tomato' below, then Save the file.
+// Fast Refresh updates the color instantly on your device!
+// The count value is PRESERVED — state is not lost. ✅
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;Pressable
+      onPress={() =&gt; setCount(c =&gt; c + 1)}
+      style={{ backgroundColor: 'royalblue', padding: 20, borderRadius: 12 }}&gt;
+      &lt;Text style={{ color: '#fff' }}&gt;Tapped {count} times&lt;/Text&gt;
+    &lt;/Pressable&gt;
+  );
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q26 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="26">
+        <div class="qn">26</div>
+        <h2 class="qt">What are Native Modules in React Native?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><strong>Native Modules</strong> are pieces of code written in <strong>Java/Kotlin</strong> (for Android) or <strong>Swift/Objective-C</strong> (for iOS) that expose device platform functionality to the JavaScript layer. When React Native doesn't have a pure-JS solution for something — Bluetooth, NFC, biometric authentication, haptic feedback, background audio — native modules bridge that gap. In practice, you rarely write them from scratch; popular ones are pre-packaged as npm libraries (e.g., <code>expo-haptics</code>, <code>expo-local-authentication</code>). Under the New Architecture, native modules are called <strong>Turbo Modules</strong> and load lazily for better startup performance.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSX · Consuming Native Modules</span>
+        </div>
+        <pre><code class="blk">import * as Haptics from 'expo-haptics';
+import * as LocalAuth from 'expo-local-authentication';
+
+// expo-haptics internally calls the iOS/Android haptic API (native)
+async function onButtonPress() {
+  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+}
+
+// expo-local-authentication calls Face ID / fingerprint (native biometrics)
+async function authenticate() {
+  const { success } = await LocalAuth.authenticateAsync({ promptMessage: 'Verify identity' });
+  console.log('Authenticated:', success);
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q27 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="27">
+        <div class="qn">27</div>
+        <h2 class="qt">What is the difference between an .apk and an .aab file for Android?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">An <strong>.apk</strong> (Android Package) is a self-contained, ready-to-install file you can share directly — send it via email or a link, and users tap to install. Perfect for internal QA testing without the Play Store. An <strong>.aab</strong> (Android App Bundle) is the modern format required by Google Play since 2021. The Play Store uses the .aab to generate device-specific optimized APKs (tailored to screen density and CPU architecture), resulting in <strong>15–50% smaller download sizes</strong> for end users. You cannot install an .aab directly on a device.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSON · eas.json — build types</span>
+        </div>
+        <pre><code class="blk">{
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "android": { "buildType": "apk" }          // ← .apk for direct install / QA
+    },
+    "production": {
+      "android": { "buildType": "app-bundle" },  // ← .aab for Google Play Store
+      "ios":     { "resourceClass": "m-medium" }
+    }
+  }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q28 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="28">
+        <div class="qn">28</div>
+        <h2 class="qt">What is a Provisioning Profile in iOS development?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans">A <strong>Provisioning Profile</strong> is a signed certificate issued by Apple that grants permission for a specific app (identified by its Bundle Identifier) to run on specific devices, use specific entitlements (push notifications, iCloud, Apple Pay, etc.), and be distributed in a specific way (App Store, Ad Hoc, or Enterprise). Think of it as Apple's signed permission slip — without it, iOS will refuse to run your app. The four types are: <strong>Development</strong>, <strong>Ad Hoc</strong>, <strong>App Store</strong>, and <strong>Enterprise</strong>. <strong>EAS handles provisioning profiles completely automatically</strong>, which is one of its biggest beginner-friendly benefits.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Bash · EAS Manages This For You</span>
+        </div>
+        <pre><code class="blk"># EAS auto-creates and manages provisioning profiles:
+eas build --platform ios --profile production
+# → Prompts: "Log in to Apple Developer account"
+# → Creates / fetches your Distribution Certificate
+# → Creates / fetches the correct Provisioning Profile
+# → Signs and outputs your .ipa — store ready ✅
+
+# Profile types and their use cases:
+# Development  → dev builds on registered devices (up to 100)
+# Ad Hoc       → QA distribution to registered devices
+# App Store    → submitting to the public App Store
+# Enterprise   → internal company distribution (B2B)</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q29 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="29">
+        <div class="qn">29</div>
+        <h2 class="qt">What is google-services.json and where does it go in your project?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>google-services.json</code> is a configuration file downloaded from the <strong>Firebase Console</strong> (Project Settings → Your Apps → Android). It contains your Firebase project's API keys, project ID, storage bucket, messaging sender ID, and app IDs that let your Android app connect to Firebase services (Firestore, FCM push notifications, Analytics, Auth, etc.). Think of it as the access card your Android app shows to Firebase to prove "I belong to this project." <strong>Never commit it to a public GitHub repository</strong> — it contains keys that should remain private.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">Config · File Placement</span>
+        </div>
+        <pre><code class="blk"># ── Bare Workflow / React Native CLI ──────────────────────
+# Place the file directly in the Android app folder:
+android/app/google-services.json   ✅
+
+# ── Expo Managed Workflow ──────────────────────────────────
+# Place it at project root and reference in app.json:
+{
+  "expo": {
+    "android": {
+      "googleServicesFile": "./google-services.json"
+    }
+  }
+}
+
+# iOS equivalent: GoogleService-Info.plist
+# { "expo": { "ios": { "googleServicesFile": "./GoogleService-Info.plist" } } }</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Q30 ─── -->
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+      <div class="qh" data-n="30">
+        <div class="qn">30</div>
+        <h2 class="qt">What is eas.json and what are build profiles?</h2>
+      </div>
+      <hr class="div" />
+      <p class="lbl">📖 Answer</p>
+      <p class="ans"><code>eas.json</code> is the configuration file for EAS Build and EAS Submit. It lives at the project root and defines named <strong>build profiles</strong> — each a different recipe for building your app. The three standard profiles are: <code>development</code> (debug build with the dev client for rapid iteration), <code>preview</code> (internal APK/IPA without store submission, for QA teams), and <code>production</code> (release AAB/IPA for the app store). You select a profile at build time with the <code>--profile</code> flag. EAS created <code>eas.json</code> automatically when you run <code>eas build:configure</code>.</p>
+      <div class="code-wrap">
+        <div class="cb-header">
+          <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+          <span class="lang-badge">JSON · eas.json</span>
+        </div>
+        <pre><code class="blk">{
+  "build": {
+    "development": {
+      "developmentClient": true,       // use dev-client, not Expo Go
+      "distribution":      "internal", // install via QR / link
+      "android": { "buildType": "apk" }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": { "buildType": "apk" }  // shareable APK for QA
+    },
+    "production": {
+      "android": { "buildType": "app-bundle" },  // .aab for Play Store
+      "ios":     { "resourceClass": "m-medium" } // M2 Mac build runner
+    }
+  }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer class="footer">
+  <div class="footer-card">
+    <span class="done-badge">✅ Module 1 Complete</span>
+    <h3>Questions 1 – 30 Done!</h3>
+    <p>Type <span class="kbd">next</span> to receive <strong>Module 2</strong>:<br>Core UI Components &amp; Performance (Q31–60)</p>
+  </div>
+</footer>
+
+</body>
+</html>
